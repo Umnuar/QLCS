@@ -1,0 +1,47 @@
+# Node & dependencies
+node_modules/
+**/node_modules/
+
+# Build outputs
+dist/
+**/dist/
+dist-electron/
+**/dist-electron/
+dist-ssr/
+**/dist-ssr/
+release/
+**/release/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+**/.env
+**/.env.local
+**/.env.*.local
+!.env.example
+!**/.env.example
+
+# Logs
+*.log
+logs/
+**/logs/
+
+# Backups & uploads
+backups/
+**/backups/
+uploads/
+**/uploads/
+
+# OS & Editor
+.DS_Store
+Thumbs.db
+Desktop.ini
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# SQLite legacy
+*.sqlite
+*.sqlite3
+*.db
