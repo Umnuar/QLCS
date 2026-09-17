@@ -230,10 +230,11 @@ QLCS-Client/
     │   ├── importHtxhWorker.ts       # Luồng bóc tách Excel HTXH
     │   ├── importCutriWorker.ts      # Luồng bóc tách danh sách cử tri
     │   └── workerUtils.ts            # Tiện ích giải thuật Levenshtein distance (ngưỡng >= 0.85)
-    └── __tests__/                    # 7 Test Suites Vitest (112 tests) ĐẠT 100%
+    └── __tests__/                    # 8 Test Suites Vitest (117 tests) ĐẠT 100%
         ├── schemas.test.ts           # 37 tests kiểm tra xác thực Zod
         ├── helpers.test.ts           # 25 tests kiểm tra chuỗi tiếng Việt & format
         ├── age.test.ts               # 19 tests kiểm tra thuật toán mốc tuổi & sinh nhật
+        ├── statsLoopRegression.test.ts # 5 tests chống lặp vô hạn & tràn request thống kê
         ├── workerUtils.test.ts       # 16 tests kiểm tra Levenshtein & bóc tách dữ liệu
         ├── useFormValidation.test.ts # 7 tests kiểm tra hook xác thực form
         ├── useUndo.test.ts           # 6 tests kiểm tra Undo stack
