@@ -45,3 +45,10 @@ Desktop.ini
 *.sqlite
 *.sqlite3
 *.db
+
+# Graphify & CodeGraph local index
+.graphify/
+GRAPH_REPORT.md
+.codegraph/
+*.codegraph.db
+graphify-out/

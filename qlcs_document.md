@@ -38,7 +38,7 @@ Hệ thống chuyển đổi số xã Đăk Hà vận hành theo nguyên tắc b
    }
    ```
 4. **Cô lập Dữ liệu Cấp Thôn (Village Scoping RBAC Contract):**
-   - **Role `admin` (Cán bộ Xã):** Truy cập toàn bộ dữ liệu của 7 thôn, lọc tùy biến.
+   - **Role `admin` (Cán bộ Xã):** Truy cập toàn bộ dữ liệu của tất cả các thôn, lọc tùy biến.
    - **Role `user` (Trưởng thôn):** Backend bắt buộc cưỡng chế lọc dữ liệu theo `req.user.village_id`. Client tuyệt đối không gửi `village_id` của thôn khác lên server.
 
 ### 1.3. Sơ đồ Topology 2 Tầng của Phân hệ QLCS
@@ -95,10 +95,10 @@ QLCS-Backend/
 ├── scripts/                          # Scripts kiểm thử thực nghiệm, seed tài khoản, verify bảo mật
 │   ├── audit-db.ts                   # Kiểm toán tính nhất quán dữ liệu
 │   ├── check-users.ts                # Kiểm tra danh sách tài khoản
-│   ├── check-villages.ts             # Kiểm tra danh mục 7 thôn
+│   ├── check-villages.ts             # Kiểm tra danh mục các thôn
 │   ├── clean-test-data.ts            # Dọn dẹp dữ liệu rác
 │   ├── seed-admin.ts                 # Khởi tạo tài khoản Quản trị viên cấp xã
-│   ├── seed-village-users.ts         # Khởi tạo 7 tài khoản Trưởng thôn
+│   ├── seed-village-users.ts         # Khởi tạo tài khoản Trưởng thôn
 │   ├── sync-all-users.ts             # Đồng bộ tài khoản
 │   ├── verify-encryption-security.ts # Kiểm toán mã hóa AES-256-GCM & SHA-256 Blind Index
 │   ├── verify-optimistic-concurrency.ts # Kiểm toán khóa lạc quan OCC versioning
@@ -114,7 +114,7 @@ QLCS-Backend/
     │   ├── htxh.controller.ts        # CRUD Hỗ trợ xã hội (6 diện chính sách), Offset Pagination, OCC
     │   ├── villages.controller.ts    # Quản trị danh mục thôn, thống kê tổng hợp số liệu từng thôn
     │   ├── excel.controller.ts       # Excel Smart-Upsert: Template, Preview phân tích dòng, Import ACID Transaction, Export
-    │   ├── analytics.controller.ts   # Thống kê phân tích tổng hợp toàn xã và so sánh đối soát 7 thôn
+    │   ├── analytics.controller.ts   # Thống kê phân tích tổng hợp toàn xã và so sánh đối soát các thôn
     │   ├── audit.controller.ts       # Tra cứu nhật ký kiểm toán hệ thống và chi tiết thay đổi hồ sơ (JSON Diff)
     │   ├── backup.controller.ts      # Sao lưu CSDL ra snapshot JSON, phục hồi dữ liệu, initBackupCron (02:00 AM)
     │   └── settings.controller.ts    # Đọc/ghi cấu hình hệ thống key-value (năm tính toán mốc tuổi...)
@@ -202,7 +202,7 @@ QLCS-Client/
     │   │       ├── useProfiles.ts    # Hook tải danh sách phân trang, toggle nhận quà, xóa, lưu OCC
     │   │       ├── useFilters.ts     # Hook quản lý debounce tìm kiếm và bộ lọc
     │   │       └── useImportExport.ts# Hook điều phối nhập/xuất Excel
-    │   ├── VillagesPage.tsx          # Màn hình quản lý 7 thôn/làng xã Đăk Hà
+    │   ├── VillagesPage.tsx          # Màn hình quản lý các thôn/làng xã Đăk Hà
     │   ├── AnalyticsPage.tsx         # Màn hình phân tích số liệu, biểu đồ so sánh chỉ tiêu giữa các thôn
     │   ├── AuditLogPage.tsx          # Màn hình tra cứu nhật ký kiểm toán, xem JSON Diff lịch sử chỉnh sửa
     │   ├── RecycleBinPage.tsx        # Màn hình Thùng rác (khôi phục hoặc xóa vĩnh viễn bản ghi)
@@ -424,7 +424,7 @@ erDiagram
 | | `POST` | `/api/users` | Admin Only | Tạo tài khoản cán bộ mới |
 | | `PUT` | `/api/users/:id` | Admin Only | Phân công thôn hoặc cập nhật thông tin cán bộ |
 | | `DELETE`| `/api/users/:id` | Admin Only | Xóa tài khoản cán bộ |
-| **Thôn / Làng** | `GET` | `/api/villages` | Authenticated | Danh mục 7 thôn kèm thống kê tổng hợp số lượng hồ sơ |
+| **Thôn / Làng** | `GET` | `/api/villages` | Authenticated | Danh mục các thôn kèm thống kê tổng hợp số lượng hồ sơ |
 | | `GET` | `/api/villages/stats` | Authenticated | Thống kê số lượng hồ sơ chi tiết theo từng thôn |
 | | `POST` | `/api/villages` | Admin Only | Thêm thôn mới |
 | | `PUT` | `/api/villages/:id` | Admin Only | Đổi tên thôn |
@@ -468,7 +468,7 @@ erDiagram
 | | `POST` | `/api/excel/import` | Village Scoped | Nhập dữ liệu Smart-Upsert vào CSDL qua ACID Transaction |
 | | `GET/POST`| `/api/excel/export` | Village Scoped | Xuất danh sách dữ liệu ra file Excel chuẩn |
 | **Thống Kê** | `GET` | `/api/analytics/overview`| Village Scoped| Tổng quan số liệu toàn xã hoặc theo thôn |
-| | `GET` | `/api/analytics/by-village`| Village Scoped| Bảng đối soát so sánh các chỉ tiêu giữa 7 thôn |
+| | `GET` | `/api/analytics/by-village`| Village Scoped| Bảng đối soát so sánh các chỉ tiêu giữa các thôn |
 | **Audit Logs** | `GET` | `/api/audit-logs` | Village Scoped| Tra cứu nhật ký biến động dữ liệu toàn hệ thống kèm JSON Diff |
 | **Sao Lưu CSDL**| `GET` | `/api/backups` | Admin Only | Danh sách các bản sao lưu hiện có |
 | | `POST` | `/api/backups/export` | Admin Only | Xuất bản sao lưu CSDL dạng JSON snapshot |
