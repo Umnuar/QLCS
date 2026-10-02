@@ -1,118 +1,138 @@
-# DANH SÁCH CÁC LUỒNG NGƯỜI DÙNG KIỂM THỬ TRỰC TIẾP TRÊN TRÌNH DUYỆT (USER TEST FLOWS)
-## Dự án: Quản Lý Chính Sách (QLCS v3.0.0) — UBND Xã Đăk Hà
-## Phục vụ: Chiến dịch Browser QA, Phân tích Lỗi & Khắc phục Toàn diện
+# Danh Sách Các Luồng Người Dùng Kiểm Thử (User Flows) — QLCS v3.0.0
+
+Tài liệu này định nghĩa chi tiết các kịch bản và luồng thao tác người dùng (User Flows) để phục vụ kiểm thử trực tiếp trên trình duyệt theo quy trình QA Pha 1.
 
 ---
 
-## 1. TỔNG QUAN MA TRẬN 7 LUỒNG NGƯỜI DÙNG
+## Danh Mục Phân Hệ & Luồng Kiểm Thử
 
-| Mã Luồng | Tên Luồng Kiểm Thử | Phân Hệ / Route | Mục Tiêu Chính | Mức Độ Ưu Tiên |
-| :---: | :--- | :--- | :--- | :---: |
-| **FLOW-01** | Xác thực, Quản lý Phiên & Phân quyền RBAC | `/login` $\rightarrow$ Auth Gate | Đăng nhập Admin/Thôn, sai pass, logout, refresh token | **P0** |
-| **FLOW-02** | Khảo Sát & Lựa Chọn Thôn Làm Việc | Tab `villages` | Điều hướng 7 thôn, phím Tab+Enter, indicator Header | **P1** |
-| **FLOW-03** | Quản Lý Hồ Sơ Chúc Thọ Người Cao Tuổi | Tab `chuctho` | Lọc 10 mốc tuổi, tìm kiếm unaccented, YearSelector | **P1** |
-| **FLOW-04** | Quản Lý Trợ Cấp Hưu Trí Xã Hội (HTXH) | Tab `htxh` | Diện trợ cấp, mốc 75+, chuyển tab nhanh AbortController | **P1** |
-| **FLOW-05** | Thao Tác Modal Hồ Sơ (Thêm, Sửa & OCC) | Modal `ProfileModal` | Focus trap, validate ngày sinh, chống mất data, OCC 409 | **P0** |
-| **FLOW-06** | Vòng Đời Xóa Hồ Sơ & Thùng Rác | Tab `recycle-bin` | Xóa mềm, khôi phục, xóa vĩnh viễn, bảo tồn audit log | **P0** |
-| **FLOW-07** | Nhật Ký Hoạt Động, Cài Đặt & Theme / Responsive | Tab `audit`, `settings` | Timeline log, Dark/Light mode, 3 viewports (360/768/1280) | **P2** |
-
----
-
-## 2. CHI TIẾT KỊCH BẢN TỪNG LUỒNG KIỂM THỬ
-
-### FLOW-01: Xác thực, Quản lý Phiên & Phân quyền RBAC
-- **Mục đích**: Xác nhận luồng đăng nhập an toàn, phân quyền hiển thị theo vai trò (Admin toàn xã vs Cán bộ thôn), kiểm tra bảo vệ token và cơ chế thoát phiên.
-- **Dữ liệu thử**:
-  - Tài khoản Admin: `admin`
-  - Tài khoản Thôn: `daklang` (hoặc tài khoản thôn tương đương trong CSDL)
+### FLOW-01: Xác thực & Đăng nhập (Authentication Flow)
+- **Mục đích**: Kiểm tra cơ chế đăng nhập với các vai trò (Admin, Cán bộ thôn), kiểm tra xác thực form, xử lý lỗi đăng nhập sai thông tin và cơ chế bảo lưu phiên làm việc.
 - **Các bước thực hiện**:
-  1. Mở trình duyệt tại `http://localhost:5173/`.
-  2. Để trống tên đăng nhập và mật khẩu, nhấn nút `[Đăng Nhập]` $\rightarrow$ Kiểm tra thông báo yêu cầu nhập đầy đủ.
-  3. Nhập username `admin`, mật khẩu sai bất kỳ $\rightarrow$ Bấm `[Đăng Nhập]` $\rightarrow$ Kiểm tra hiển thị thông báo lỗi từ server, không làm sập giao diện.
-  4. Nhập username `admin` và mật khẩu đúng $\rightarrow$ Bấm `[Đăng Nhập]` $\rightarrow$ Ứng dụng chuyển sang màn hình Quản lý Thôn (`VillagesPage`).
-  5. Kiểm tra Header: hiển thị đúng tên đăng nhập `admin` và huy hiệu "Quản trị viên".
-  6. Mở DevTools Console & Application: kiểm tra `localStorage`/`sessionStorage` không lưu mật khẩu trần.
-  7. Bấm nút `[Đăng Xuất]` $\rightarrow$ Xác nhận token bị xóa khỏi storage và quay trở về màn hình đăng nhập.
-  8. Đăng nhập bằng tài khoản Cán bộ thôn (`daklang`) $\rightarrow$ Kiểm tra tự động chuyển thẳng vào tab Thống kê của thôn Đăk Lăng, Sidebar bị giới hạn chỉ hiển thị dữ liệu của thôn đó.
-- **Kết quả mong đợi**: Luồng đăng nhập mượt mà, phân quyền tuyệt đối, không có lỗi console unhandled.
+  1. Tải trang gốc `http://localhost:5173/` (trạng thái chưa đăng nhập).
+  2. Để trống tài khoản/mật khẩu và nhấn nút "Đăng Nhập" $\rightarrow$ Kiểm tra thông báo lỗi validation.
+  3. Nhập tài khoản không tồn tại (vd: `invalid_user`) $\rightarrow$ Kiểm tra thông báo lỗi từ server ("Tài khoản hoặc mật khẩu không chính xác").
+  4. Nhập đúng tài khoản Cán bộ thôn (vd: `thon1`) $\rightarrow$ Xác nhận đăng nhập thành công, điều hướng thẳng tới tab Thống kê của thôn tương ứng.
+  5. Đăng xuất và đăng nhập lại bằng tài khoản Quản trị viên (`admin`) $\rightarrow$ Xác nhận hiển thị danh sách thôn tại màn hình `VillagesPage`.
+- **Kết quả mong đợi**:
+  - Giao diện form hiển thị đúng nhãn a11y, focus rõ ràng, báo lỗi đúng vị trí.
+  - Sau khi đăng nhập, JWT access token & refresh token được lưu bảo mật, giao diện chuyển tab tương ứng với quyền (RBAC).
 
 ---
 
-### FLOW-02: Khảo Sát & Lựa Chọn Thôn Làm Việc (VillagesPage)
-- **Mục đích**: Kiểm tra giao diện bản đồ số 7 thôn xã Đăk Hà, tính tiếp cận phím và khả năng chuyển ngữ cảnh làm việc cho Admin.
+### FLOW-02: Điều hướng & Quản lý Thôn (Navigation & Village Selection)
+- **Mục đích**: Kiểm tra luồng điều hướng giữa các phân hệ, chọn thôn làm việc và chuyển đổi ngữ cảnh.
 - **Các bước thực hiện**:
-  1. Đăng nhập tài khoản `admin`, tại tab `Quản Lý Thôn`.
-  2. Rà soát 7 thẻ thôn: Đăk Lăng, Đăk Tin, Kon Gung, Kon Trang Long Loi, Kon Hnong Yôp, Kon Tu Peng, Kon Brain.
-  3. Kiểm tra Accessibility: dùng phím `Tab` để di chuyển tiêu điểm qua từng thôn. Xác nhận xuất hiện viền sáng focus `ring-2 ring-emerald-500`. Nhấn phím `Enter` hoặc `Space` trên một thẻ thôn.
-  4. Click chuột vào thẻ thôn "Đăk Lăng" $\rightarrow$ Kiểm tra hệ thống chuyển tab sang Thống kê của thôn Đăk Lăng; Header cập nhật badge "Thôn: Đăk Lăng" màu xanh ngọc.
-  5. Click vào nút "Quản Lý Thôn" trên Sidebar hoặc nút badge Thôn trên Header $\rightarrow$ Quay trở lại màn hình 7 thôn toàn xã.
-- **Kết quả mong đợi**: Điều hướng thôn mượt mà, hỗ trợ 100% bàn phím, chỉ số thống kê trên thẻ thôn hiển thị chính xác.
+  1. Từ màn hình `VillagesPage` (Admin), kiểm tra danh sách các thôn (Thôn 1, Thôn 2, Thôn 3, Thôn 4, Kon Trang Long Loi, Kon Tu Dơ 1, Kon Tu Dơ 2).
+  2. Bấm vào một thôn cụ thể (vd: Thôn 1) $\rightarrow$ Kiểm tra Sidebar cập nhật hiển thị các mục "Hồ Sơ Chúc Thọ", "Hưu Trí Xã Hội" của thôn đó.
+  3. Bấm vào nút "Quản Lý Thôn" (hoặc thẻ Village Indicator trên Header) $\rightarrow$ Quay trở lại màn hình chọn thôn.
+  4. Bấm nút "Xem Báo Cáo Đối Soát" trên Banner $\rightarrow$ Chuyển thẳng tới tab Thống Kê toàn xã.
+- **Kết quả mong đợi**:
+  - Thẻ thôn hỗ trợ điều hướng chuột và phím (`Tab`, `Enter`, `Space`).
+  - Không có giật layout hay delay hiển thị khi đổi ngữ cảnh thôn.
 
 ---
 
-### FLOW-03: Quản Lý Hồ Sơ Chúc Thọ Người Cao Tuổi (Dashboard - Chúc Thọ)
-- **Mục đích**: Kiểm tra hiển thị bảng danh sách chúc thọ, bộ lọc mốc tuổi, tìm kiếm unaccented tiếng Việt, thay đổi năm tính toán và phân trang.
+### FLOW-03: Quản lý Hồ sơ Chúc Thọ (Chuctho Profile CRUD Flow)
+- **Mục đích**: Kiểm tra toàn bộ vòng đời hồ sơ chúc thọ: Thêm mới, Sửa, Đánh dấu nhận quà, Xóa mềm vào Thùng rác.
 - **Các bước thực hiện**:
-  1. Tại một thôn đã chọn, bấm tab `Hồ Sơ Chúc Thọ` trên Sidebar.
-  2. Kiểm tra `StatsCards`: đếm tổng số hồ sơ, phân bổ theo các mốc tuổi tròn, tỷ lệ trao quà.
-  3. Kiểm tra ô tìm kiếm: gõ "nguyen", "thi", tiếng Việt có dấu và không dấu $\rightarrow$ Danh sách cập nhật tức thời sau debounce 300ms.
-  4. Kiểm tra bộ lọc mốc tuổi `CustomSelect`: chọn mốc 70 tuổi, 80 tuổi, 90 tuổi $\rightarrow$ Bảng chỉ giữ lại các cụ đúng mốc tuổi đã chọn.
-  5. Kiểm tra bộ chọn năm `YearSelector`:
-     - Bấm nút năm hiện tại $\rightarrow$ Popover menu mở ra.
-     - Nhập năm dự toán `2027` vào ô input $\rightarrow$ Nhấn `Enter` $\rightarrow$ Xác nhận mốc tuổi và danh sách tự động tính lại theo năm 2027.
-  6. Kiểm tra phân trang `TablePagination`:
-     - Đổi số dòng hiển thị từ `20` sang `50`, rồi sang `10` $\rightarrow$ Xác nhận số trang và chỉ số hiển thị bản ghi tính toán chính xác, tự động đưa về trang 1.
-     - Bấm nút `[Sau]` và `[Trước]` để chuyển trang.
-- **Kết quả mong đợi**: Bảng dữ liệu không bị giật lag, bộ lọc kết hợp chính xác, không phát sinh memory leak khi đổi năm liên tục.
+  1. Vào phân hệ "Hồ Sơ Chúc Thọ".
+  2. Bấm nút `[+ Thêm Hồ Sơ]` $\rightarrow$ Mở `ProfileModal`.
+  3. Thử submit form rỗng hoặc nhập ngày sinh không hợp lệ $\rightarrow$ Kiểm tra form validation.
+  4. Nhập đầy đủ thông tin mẫu: Họ tên ("NGUYỄN VĂN TEST"), Ngày sinh ("01/01/1956" - 70 tuổi), CCCD 12 số, Dân tộc ("Kinh"), Thôn $\rightarrow$ Bấm "Lưu Hồ Sơ".
+  5. Xác nhận hồ sơ xuất hiện trong bảng với đúng mốc tuổi (70 tuổi) và CCCD được che `••••••••1234`.
+  6. Bấm nút "Sửa" trên hàng $\rightarrow$ Cập nhật thông tin ghi chú $\rightarrow$ Bấm "Lưu" $\rightarrow$ Xác nhận dữ liệu cập nhật.
+  7. Bấm nút "Đánh dấu nhận quà" $\rightarrow$ Trạng thái chuyển đổi ngay lập tức.
+  8. Bấm nút "Xóa" $\rightarrow$ Xác nhận trong hộp thoại xác nhận $\rightarrow$ Hồ sơ biến mất khỏi bảng chính.
+- **Kết quả mong đợi**:
+  - Modal có Focus Trap, không bị mất tiêu điểm, hỗ trợ phím `Escape`.
+  - Dữ liệu lưu thành công không làm mất form khi có lỗi.
+  - OCC version được kiểm soát chặt chẽ.
 
 ---
 
-### FLOW-04: Quản Lý Trợ Cấp Hưu Trí Xã Hội (Dashboard - HTXH)
-- **Mục đích**: Kiểm tra dữ liệu phân hệ Hưu trí xã hội và khả năng chống Stale UI khi chuyển tab nhanh.
+### FLOW-04: Quản lý Trợ cấp Hưu trí Xã hội (HTXH CRUD Flow)
+- **Mục đích**: Kiểm tra thao tác với hồ sơ Hưu trí Xã hội theo diện trợ cấp.
 - **Các bước thực hiện**:
-  1. Bấm chọn tab `Hưu Trí Xã Hội` trên Sidebar.
-  2. Kiểm tra các cột dữ liệu chính sách: Diện trợ cấp (75+, 70-74 nghèo, Bảo trợ xã hội), Ngày bắt đầu hưởng, Mức hưởng hàng tháng, Trạng thái chi trả.
-  3. Kiểm tra lọc theo diện chính sách và tìm kiếm họ tên.
-  4. Thực hiện chuyển đổi qua lại nhanh liên tục giữa 2 tab `chuctho` và `htxh` (Stress test Stale UI).
-  5. Kiểm tra DevTools Network tab: các request đang bay dở khi đổi tab phải được hủy bằng `AbortController` (mã trạng thái `canceled`), không đè chồng dữ liệu lên giao diện.
-- **Kết quả mong đợi**: Bảng HTXH hiển thị chuẩn chỉ số liệu, không có lỗi race condition hay gián đoạn hiển thị.
+  1. Vào phân hệ "Hưu Trí Xã Hội" (`htxh`).
+  2. Bấm nút `[+ Thêm Hồ Sơ]` $\rightarrow$ Kiểm tra các trường đặc thù của HTXH (diện trợ cấp, mức hưởng, quyết định hưởng).
+  3. Thêm mới một hồ sơ HTXH thử nghiệm $\rightarrow$ Xác nhận hiển thị trên bảng.
+  4. Lọc theo từng diện trợ cấp $\rightarrow$ Xác nhận danh sách lọc chính xác.
+  5. Xóa mềm hồ sơ thử nghiệm $\rightarrow$ Xác nhận chuyển vào thùng rác.
+- **Kết quả mong đợi**:
+  - Dữ liệu tính toán diện hưởng và mức trợ cấp khớp với nghiệp vụ.
 
 ---
 
-### FLOW-05: Thao Tác Modal Hồ Sơ (Thêm Mới, Sửa Đổi & OCC)
-- **Mục đích**: Kiểm tra hành vi Modal nhập liệu, Focus Trap, validation ngày sinh, xử lý lưu thất bại và khóa lạc quan OCC.
+### FLOW-05: Tìm kiếm, Bộ lọc & Phân trang (Search, Filter & Pagination Flow)
+- **Mục đích**: Kiểm tra tốc độ tìm kiếm không dấu, debounce, AbortController chống stale UI, và tính nhất quán khi đổi phân trang.
 - **Các bước thực hiện**:
-  1. Tại Dashboard, bấm nút `[+ Thêm Hồ Sơ]` trên Header Island $\rightarrow$ Modal mở ra.
-  2. Xác nhận tiêu điểm chuột tự động rơi vào ô input đầu tiên ("Họ và Tên").
-  3. Nhấn phím `Tab` tuần hoàn $\rightarrow$ Xác nhận tiêu điểm giữ nguyên bên trong Modal (Focus Trap), không lọt ra ngoài nền trang.
-  4. Nhập họ tên có khoảng trắng thừa đầu/cuối, nhập ngày sinh không hợp lệ (`31/02/1950`, `99/99/9999`) $\rightarrow$ Kiểm tra cảnh báo validation hiển thị rõ ràng.
-  5. Bấm phím `Escape` $\rightarrow$ Modal đóng an toàn, tiêu điểm phục hồi về nút `[+ Thêm Hồ Sơ]`.
-  6. Bấm nút Sửa trên một hồ sơ thử nghiệm $\rightarrow$ Chỉnh sửa địa chỉ hoặc số CCCD $\rightarrow$ Bấm `[Lưu Thay Đổi]` $\rightarrow$ Xác nhận lưu thành công, modal đóng, toast màu xanh hiện ra.
-  7. Kiểm tra phòng vệ mất dữ liệu: Nếu lưu thất bại do mất mạng hoặc lỗi máy chủ, Modal phải giữ nguyên dữ liệu đang nhập dở, tuyệt đối không được tự động đóng xóa sạch form (Silent Data Loss).
-- **Kết quả mong đợi**: Trải nghiệm form thân thiện, an toàn tuyệt đối trước nguy cơ mất dữ liệu người dùng.
+  1. Gõ tìm kiếm họ tên bằng tiếng Việt không dấu (vd: "nguyen van") $\rightarrow$ Kiểm tra bảng cập nhật kết quả tương ứng.
+  2. Lọc theo mốc tuổi (70, 75, 80...).
+  3. Lọc theo trạng thái nhận quà (Đã nhận / Chưa nhận).
+  4. Dùng `YearSelector`: Chọn năm dự báo tương lai (vd: 2027) $\rightarrow$ Xác nhận mốc tuổi và thống kê tính toán lại theo năm đó.
+  5. Đang ở trang 2 hoặc 3, đổi số bản ghi hiển thị (từ 10 lên 50) $\rightarrow$ Kiểm tra trang tự động reset về trang 1 (TASK-P1-01).
+- **Kết quả mong đợi**:
+  - Không có hiện tượng giật màn hình hoặc request cũ đè request mới.
+  - Phân trang tính toán chính xác tổng số bản ghi và tổng số trang.
 
 ---
 
-### FLOW-06: Vòng Đời Xóa Hồ Sơ & Thùng Rác (RecycleBin & Audit Preservation)
-- **Mục đích**: Kiểm tra xóa mềm, khôi phục hồ sơ và xóa vĩnh viễn bảo tồn lịch sử kiểm toán.
+### FLOW-06: Nhập Excel & Bảng Đối Soát Xem Trước (Excel Import Flow)
+- **Mục đích**: Kiểm tra tính năng kéo thả file Excel, parse dữ liệu qua Web Worker, kiểm tra bảng preview đối soát 10 cột, phát hiện dòng lỗi và nhập dữ liệu.
 - **Các bước thực hiện**:
-  1. Tại danh sách hồ sơ, bấm nút Xóa một hồ sơ thử nghiệm $\rightarrow$ Hộp thoại cảnh báo xuất hiện.
-  2. Xác nhận xóa mềm $\rightarrow$ Hồ sơ biến mất khỏi danh sách chính, toast thông báo hoàn tất.
-  3. Chuyển sang tab `Thùng Rác` (`recycle-bin`) $\rightarrow$ Tìm kiếm hồ sơ vừa bị xóa mềm.
-  4. Bấm nút `[Khôi Phục]` $\rightarrow$ Xác nhận hồ sơ quay lại danh sách quản lý chính.
-  5. Thử nghiệm xóa vĩnh viễn một bản ghi rác trong Thùng rác $\rightarrow$ Xác nhận CSDL xóa bản ghi `profiles` nhưng bảo tồn nguyên vẹn bản ghi trong `profile_audit_log`.
-- **Kết quả mong đợi**: Vòng đời xóa - khôi phục - dọn thùng rác an toàn, tính bất biến kiểm toán được duy trì 100%.
+  1. Bấm nút `[📄 Nhập Excel]` trên Header Island $\rightarrow$ Mở `ImportModal`.
+  2. Bấm "Tải Biểu Mẫu Chuẩn (.xlsx)" $\rightarrow$ Xác nhận tệp tải về máy.
+  3. Kéo thả file Excel thử nghiệm có chứa cả dòng hợp lệ và dòng sai ngày sinh $\rightarrow$ Xác nhận bảng đối soát hiển thị:
+     - 3 cột đầu sticky cố định (STT, Thôn/Diện, Họ và Tên).
+     - Dòng lỗi ngày sinh được tô đỏ cảnh báo.
+     - Số lượng bản ghi hợp lệ / lỗi được thống kê chính xác.
+  4. Bấm "Xác Nhận Nhập" $\rightarrow$ Kiểm tra quá trình bulk insert và thông báo kết quả.
+- **Kết quả mong đợi**:
+  - Web Worker xử lý mượt mà, không làm đơ UI client.
+  - Bảng preview cuộn ngang mượt mà, 3 cột đầu ghim cố định chuẩn QLHK.
 
 ---
 
-### FLOW-07: Nhật Ký Hoạt Động, Cài Đặt Hệ Thống, Theme & Responsive
-- **Mục đích**: Rà soát màn hình Audit Log, Settings, chuyển đổi Light/Dark mode và co giãn responsive đa kích thước màn hình.
+### FLOW-07: Xuất Báo Cáo Excel (Excel Export Flow)
+- **Mục đích**: Kiểm tra tính năng xuất danh sách hồ sơ chúc thọ và HTXH ra tệp `.xlsx` có định dạng chuẩn (tiêu đề, khung viền, căn lề, công thức tuổi).
 - **Các bước thực hiện**:
-  1. Mở tab `Nhật Ký Hoạt Động` (`audit`) $\rightarrow$ Rà soát dòng thời gian: hiển thị đúng các thao tác vừa thực hiện ở các luồng trên. Lọc theo loại hành động.
-  2. Mở tab `Cài Đặt Hệ Thống` (`settings`) $\rightarrow$ Xem thông tin tài khoản, danh sách thôn, sao lưu CSDL.
-  3. Bấm icon chuyển đổi Sáng / Tối trên Header $\rightarrow$ Kiểm tra toàn bộ màn hình chuyển đổi màu sắc, không có chữ chìm hay vỡ tương phản.
-  4. Co giãn kích thước màn hình kiểm tra tại 3 độ phân giải chuẩn:
-     - `1280px` (Desktop): Đầy đủ sidebar mở rộng, bảng hiển thị thoải mái.
-     - `768px` (Tablet): Sidebar tự co gọn icon, bảng có thanh cuộn ngang mượt mà.
-     - `360px` (Mobile): Menu chuyển sang dạng drawer/toggle, nút bấm đạt kích thước chạm $\ge 44\text{px}$.
-- **Kết quả mong đợi**: Ứng dụng đáp ứng tốt trên mọi kích thước màn hình, độ tương phản màu đạt chuẩn WCAG 2.1 AA.
+  1. Bấm nút `[📥 Xuất Excel]`.
+  2. Kiểm tra tệp `.xlsx` được tạo và tải về máy.
+  3. Xác nhận tên tệp có chứa tên thôn và năm tính toán.
+- **Kết quả mong đợi**:
+  - Tệp Excel xuất đúng format tiếng Việt UTF-8, không bị lỗi font hay mất cột.
+
+---
+
+### FLOW-08: Thùng Rác & Khôi phục Dữ liệu (Recycle Bin Flow)
+- **Mục đích**: Kiểm tra cơ chế Soft Delete: xem danh sách đã xóa, khôi phục hồ sơ và xóa vĩnh viễn.
+- **Các bước thực hiện**:
+  1. Chuyển sang tab "Thùng Rác" (`recycle-bin`).
+  2. Xác nhận các hồ sơ đã xóa ở FLOW-03 và FLOW-04 xuất hiện tại đây.
+  3. Bấm "Khôi phục" 1 hồ sơ $\rightarrow$ Xác nhận hồ sơ quay lại bảng chính `chuctho`.
+  4. Bấm "Xóa vĩnh viễn" hồ sơ còn lại $\rightarrow$ Xác nhận modal cảnh báo xuất hiện $\rightarrow$ Đồng ý xóa $\rightarrow$ Xác nhận bản ghi bị xóa hoàn toàn khỏi DB.
+- **Kết quả mong đợi**:
+  - Dữ liệu khôi phục nguyên vẹn thuộc tính và audit log ghi nhận hành động `RESTORE` / `PERMANENT_DELETE`.
+
+---
+
+### FLOW-09: Thống Kê & Báo Cáo Tổng Hợp (Analytics Dashboard Flow)
+- **Mục đích**: Kiểm tra trang Thống Kê số liệu đối soát toàn xã và từng thôn.
+- **Các bước thực hiện**:
+  1. Mở tab "Thống Kê" (`analytics`).
+  2. Kiểm tra các thẻ KPI: Tổng số người cao tuổi, Đã nhận quà, Chưa nhận quà, Kinh phí dự kiến.
+  3. Đổi bộ lọc thôn và năm $\rightarrow$ Xác nhận biểu đồ và số liệu thay đổi tương ứng.
+- **Kết quả mong đợi**:
+  - Truy vấn tối ưu qua `groupBy` (TASK-P1-04), thời gian nạp < 300ms, không có vòng lặp 28 queries.
+
+---
+
+### FLOW-10: Cài Đặt Hệ Thống, Quản Trị & Sao Lưu (Settings & Backup Flow)
+- **Mục đích**: Kiểm tra trang Cài đặt: thông tin tài khoản, danh sách người dùng, chức năng tạo bản sao lưu DB.
+- **Các bước thực hiện**:
+  1. Mở tab "Cài Đặt Hệ Thống" (`settings`).
+  2. Kiểm tra thông tin tài khoản hiện tại.
+  3. Thử tạo bản sao lưu dữ liệu (Backup) $\rightarrow$ Xác nhận tải về tệp json/sql sao lưu an toàn.
+- **Kết quả mong đợi**:
+  - Không lộ secret key hay chuỗi nhạy cảm.

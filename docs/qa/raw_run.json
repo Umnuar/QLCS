@@ -1,0 +1,190 @@
+{
+  "timestamp": "2026-10-02T15:53:58.006Z",
+  "flows": {
+    "FLOW-01": {
+      "status": "PASSED",
+      "emptyValidationResult": "HTML5 required / Form handled",
+      "wrongPasswordAlert": "No alert found",
+      "urlAfterLogin": "http://localhost:5173/"
+    },
+    "FLOW-02": {
+      "status": "PASSED",
+      "villageCount": 62,
+      "sampleVillageNames": [
+        "Quản Lý Thôn",
+        "Thêm Thôn"
+      ]
+    },
+    "FLOW-03": {
+      "status": "PASSED",
+      "headerButtons": {
+        "importBtn": true,
+        "exportBtn": true,
+        "addBtnVisible": true
+      },
+      "modalOpened": true
+    },
+    "FLOW-04": {
+      "status": "PASSED"
+    },
+    "FLOW-05": {
+      "status": "PASSED"
+    },
+    "FLOW-06": {
+      "status": "PASSED"
+    },
+    "FLOW-08": {
+      "status": "PASSED"
+    },
+    "FLOW-09": {
+      "status": "PASSED"
+    },
+    "FLOW-10": {
+      "status": "PASSED"
+    }
+  },
+  "consoleLogs": [
+    {
+      "type": "debug",
+      "text": "[vite] connecting...",
+      "location": {
+        "url": "http://localhost:5173/@vite/client",
+        "line": 494,
+        "column": 8,
+        "lineNumber": 494,
+        "columnNumber": 8
+      }
+    },
+    {
+      "type": "debug",
+      "text": "[vite] connected.",
+      "location": {
+        "url": "http://localhost:5173/@vite/client",
+        "line": 617,
+        "column": 14,
+        "lineNumber": 617,
+        "columnNumber": 14
+      }
+    },
+    {
+      "type": "info",
+      "text": "%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold",
+      "location": {
+        "url": "http://localhost:5173/node_modules/.vite/deps/chunk-V3GQOOAF.js?v=1af58421",
+        "line": 28429,
+        "column": 24,
+        "lineNumber": 28429,
+        "columnNumber": 24
+      }
+    },
+    {
+      "type": "log",
+      "text": "[Renderer] Mounting app...",
+      "location": {
+        "url": "http://localhost:5173/src/main.tsx?t=1790956402998",
+        "line": 7,
+        "column": 8,
+        "lineNumber": 7,
+        "columnNumber": 8
+      }
+    },
+    {
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+      "location": {
+        "url": "http://localhost:5000/api/auth/login",
+        "line": 0,
+        "column": 0,
+        "lineNumber": 0,
+        "columnNumber": 0
+      }
+    },
+    {
+      "type": "error",
+      "text": "AxiosError: Request failed with status code 401\n    at settle (http://localhost:5173/node_modules/.vite/deps/axios.js?v=1af58421:1796:12)\n    at XMLHttpRequest.onloadend (http://localhost:5173/node_modules/.vite/deps/axios.js?v=1af58421:2344:7)\n    at Axios.request (http://localhost:5173/node_modules/.vite/deps/axios.js?v=1af58421:3331:41)\n    at async Object.login (http://localhost:5173/src/api/auth.ts:12:17)\n    at async handleLogin (http://localhost:5173/src/pages/Login.tsx?t=1790956297761:50:20)",
+      "location": {
+        "url": "http://localhost:5173/src/pages/Login.tsx?t=1790956297761",
+        "line": 67,
+        "column": 14,
+        "lineNumber": 67,
+        "columnNumber": 14
+      }
+    },
+    {
+      "type": "verbose",
+      "text": "[DOM] Input elements should have autocomplete attributes (suggested: \"current-password\"): (More info: https://goo.gl/9p2vKq) %o",
+      "location": {
+        "url": "http://localhost:5173/",
+        "line": 0,
+        "column": 0,
+        "lineNumber": 0,
+        "columnNumber": 0
+      }
+    },
+    {
+      "type": "verbose",
+      "text": "[DOM] Input elements should have autocomplete attributes (suggested: \"new-password\"): (More info: https://goo.gl/9p2vKq) %o",
+      "location": {
+        "url": "http://localhost:5173/",
+        "line": 0,
+        "column": 0,
+        "lineNumber": 0,
+        "columnNumber": 0
+      }
+    },
+    {
+      "type": "verbose",
+      "text": "[DOM] Input elements should have autocomplete attributes (suggested: \"new-password\"): (More info: https://goo.gl/9p2vKq) %o",
+      "location": {
+        "url": "http://localhost:5173/",
+        "line": 0,
+        "column": 0,
+        "lineNumber": 0,
+        "columnNumber": 0
+      }
+    }
+  ],
+  "networkErrors": [
+    {
+      "url": "http://localhost:5000/api/auth/login",
+      "status": 401,
+      "statusText": "Unauthorized"
+    }
+  ],
+  "securityAudit": {
+    "localStorageKeys": [
+      "theme",
+      "qlcs_theme",
+      "user",
+      "qlcs_zoom",
+      "accessToken",
+      "qlcs_client_master_key",
+      "refreshToken",
+      "darkMode"
+    ],
+    "sessionStorageKeys": [],
+    "cookies": "",
+    "userInStorage": "PRESENT",
+    "tokenInStorage": "PRESENT"
+  },
+  "performanceMetrics": {
+    "dnsTimeMs": 0,
+    "tcpTimeMs": 0,
+    "ttfbMs": 9,
+    "domInteractiveMs": 70,
+    "domContentLoadedMs": 720,
+    "loadEventMs": 725,
+    "paints": [
+      {
+        "name": "first-paint",
+        "startTimeMs": 732
+      },
+      {
+        "name": "first-contentful-paint",
+        "startTimeMs": 876
+      }
+    ]
+  },
+  "a11yIssues": [],
+  "uiIssues": []
+}
