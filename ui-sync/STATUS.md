@@ -42,6 +42,7 @@ Tài liệu này theo dõi tiến độ tổng thể của toàn bộ chiến d�
 | **P6-REPORT**  | Báo cáo tổng kết nghiệm thu dự án | Orchestrator (`technical-writer`) | 🟢 **DONE** | `ui-sync/99_report.md` | Báo cáo hoàn công đầy đủ số liệu |
 | **P7-LAYOUT-ALIGN** | Đồng bộ bố cục chính xác theo ảnh QLHK: Gỡ bỏ 4 card KPI Dashboard (tránh trùng Thống kê), chuẩn hóa Settings 4 tab & nhúng TimeCard | Orchestrator | 🟢 **DONE** | `src/pages/Dashboard/index.tsx`, `Settings/index.tsx`, `Settings/TimeCard.tsx` | Build & 104 tests pass 100% |
 | **P8-LAYOUT-POLISH**| Đồng bộ bố cục ảnh 1, 2, 3: Gỡ bỏ nút "Xem chi tiết" ở thẻ thôn (Ảnh 1), chuẩn hóa Header Bar Thống Kê chuẩn QLHK (Ảnh 2), gỡ bỏ subtitle Sidebar (Ảnh 3) | Orchestrator | 🟢 **DONE** | `VillagesPage.tsx`, `AnalyticsPage.tsx`, `Sidebar.tsx` | Build & 104 tests pass 100% |
+| **P9-FILTER-HIGHLIGHT**| Tái cấu trúc quy tắc highlight bộ lọc & form dropdown: Mặc định trung tính (không tô xanh), chỉ tô xanh khi lọc thật, hỗ trợ người khiếm sắc (chấm tròn + nút x), nút xóa tất cả bộ lọc, dropdown form luôn trung tính | Orchestrator | 🟢 **DONE** | `CustomSelect.tsx`, `ProfileFilterBar.tsx`, `AuditLogPage.tsx`, `AnalyticsPage.tsx`, `TablePagination.tsx`, `ImportModal.tsx` | Commit `6a09372`, 104/104 tests pass, Build code 0 |
 
 ---
 
