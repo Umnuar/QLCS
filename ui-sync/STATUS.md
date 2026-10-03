@@ -40,6 +40,7 @@ Tài liệu này theo dõi tiến độ tổng thể của toàn bộ chiến d�
 | **P5-VERIFY-C**| Kiểm chứng 5C: Visual Match & Token Audit (So sánh computed styles & ảnh chụp trước/sau) | `ui-ux-designer` + `accessibility-tester` | 🟢 **DONE** | `ui-sync/verify/5c_visual_match.md` | Trùng khớp 100% tokens, radii, fonts, Lucide stroke 1.5 |
 | **P5-VERIFY-D**| Kiểm chứng 5D: No Content Leakage (Grep rà soát nhãn QLHK lọt sang QLCS, không code tắt) | `code-reviewer` (Độc lập, Read-only) | 🟢 **DONE** | `ui-sync/verify/5d_content_leakage.md` | 0 rò rỉ dữ liệu, 0 code tắt |
 | **P6-REPORT**  | Báo cáo tổng kết nghiệm thu dự án | Orchestrator (`technical-writer`) | 🟢 **DONE** | `ui-sync/99_report.md` | Báo cáo hoàn công đầy đủ số liệu |
+| **P7-LAYOUT-ALIGN** | Đồng bộ bố cục chính xác theo ảnh QLHK: Gỡ bỏ 4 card KPI Dashboard (tránh trùng Thống kê), chuẩn hóa Settings 4 tab & nhúng TimeCard | Orchestrator | 🟢 **DONE** | `src/pages/Dashboard/index.tsx`, `Settings/index.tsx`, `Settings/TimeCard.tsx` | Build & 104 tests pass 100% |
 
 ---
 
