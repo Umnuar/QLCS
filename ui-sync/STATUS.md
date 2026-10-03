@@ -41,6 +41,7 @@ Tài liệu này theo dõi tiến độ tổng thể của toàn bộ chiến d�
 | **P5-VERIFY-D**| Kiểm chứng 5D: No Content Leakage (Grep rà soát nhãn QLHK lọt sang QLCS, không code tắt) | `code-reviewer` (Độc lập, Read-only) | 🟢 **DONE** | `ui-sync/verify/5d_content_leakage.md` | 0 rò rỉ dữ liệu, 0 code tắt |
 | **P6-REPORT**  | Báo cáo tổng kết nghiệm thu dự án | Orchestrator (`technical-writer`) | 🟢 **DONE** | `ui-sync/99_report.md` | Báo cáo hoàn công đầy đủ số liệu |
 | **P7-LAYOUT-ALIGN** | Đồng bộ bố cục chính xác theo ảnh QLHK: Gỡ bỏ 4 card KPI Dashboard (tránh trùng Thống kê), chuẩn hóa Settings 4 tab & nhúng TimeCard | Orchestrator | 🟢 **DONE** | `src/pages/Dashboard/index.tsx`, `Settings/index.tsx`, `Settings/TimeCard.tsx` | Build & 104 tests pass 100% |
+| **P8-LAYOUT-POLISH**| Đồng bộ bố cục ảnh 1, 2, 3: Gỡ bỏ nút "Xem chi tiết" ở thẻ thôn (Ảnh 1), chuẩn hóa Header Bar Thống Kê chuẩn QLHK (Ảnh 2), gỡ bỏ subtitle Sidebar (Ảnh 3) | Orchestrator | 🟢 **DONE** | `VillagesPage.tsx`, `AnalyticsPage.tsx`, `Sidebar.tsx` | Build & 104 tests pass 100% |
 
 ---
 
