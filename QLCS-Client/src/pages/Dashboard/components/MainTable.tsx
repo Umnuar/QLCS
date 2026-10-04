@@ -197,8 +197,8 @@ export function MainTable({
 								<col style={{ width: 140 }} />
 							</>
 						)}
-						{/* Cột 10: Quà tặng (130px cố định) */}
-						<col style={{ width: 130 }} />
+						{/* Cột 10: Quà tặng (120px gọn gàng) */}
+						<col style={{ width: 120 }} />
 						{/* Cột 11: Thao tác (96px cố định) */}
 						<col style={{ width: 96 }} />
 					</colgroup>

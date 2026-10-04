@@ -458,7 +458,7 @@ export const ProfileRow = React.memo(function ProfileRow({
 				</>
 			)}
 
-			{/* CỘT 10: Trạng thái nhận quà (Vùng bấm ≥ 44px, đổi tức thì, aria-live) */}
+			{/* CỘT 10: Trạng thái nhận quà (Nút gọn gàng, đổi tức thì, aria-live) */}
 			<td className="w-28 py-1 px-2 text-center border-b border-slate-100 dark:border-slate-800/80 whitespace-nowrap">
 				<button
 					type="button"
@@ -476,7 +476,7 @@ export const ProfileRow = React.memo(function ProfileRow({
 								: "Chưa nhận quà"
 					}
 					className={clsx(
-						"min-h-[44px] min-w-[44px] w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold border transition-all cursor-pointer select-none",
+						"inline-flex items-center justify-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold border transition-all cursor-pointer select-none active:scale-95",
 						isTogglingGift && "opacity-60 cursor-not-allowed",
 						profile.received
 							? "bg-emerald-50 text-emerald-700 border-emerald-200/90 hover:bg-emerald-100 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800"
@@ -494,7 +494,7 @@ export const ProfileRow = React.memo(function ProfileRow({
 					) : profile.received ? (
 						<>
 							<CheckCircle2
-								className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0"
+								className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0"
 								strokeWidth={2}
 							/>
 							<span>Đã nhận</span>
@@ -502,7 +502,7 @@ export const ProfileRow = React.memo(function ProfileRow({
 					) : (
 						<>
 							<Circle
-								className="w-4 h-4 text-slate-400 dark:text-slate-500 shrink-0"
+								className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 shrink-0"
 								strokeWidth={1.75}
 							/>
 							<span>Chưa nhận</span>
