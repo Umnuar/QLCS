@@ -1,11 +1,14 @@
 import {
+	ArrowLeft,
 	Award,
 	BarChart3,
+	Calendar,
 	CheckCircle,
 	Clock,
 	Download,
 	PieChart,
 	RefreshCw,
+	RotateCcw,
 	TrendingUp,
 	Users,
 } from "lucide-react";
@@ -28,7 +31,6 @@ import {
 	ScrollFadeContainer,
 	formatVnPercent,
 } from "../components/analytics/AnalyticsWidgets";
-import { CustomSelect } from "../components/common/CustomSelect";
 import {
 	TABLE_STYLES,
 	formatVietnameseNumber,
@@ -40,11 +42,19 @@ export const AnalyticsPage: React.FC = () => {
 		villages,
 		selectedVillageId,
 		setSelectedVillageId,
+		setActiveTab,
 		user,
 	} = useApp();
 	const isAdmin = user?.role === "admin";
 	const currentYear = new Date().getFullYear();
-	const [selectedYear, setSelectedYear] = useState<number>(currentYear);
+	const [selectedYear, setSelectedYear] = useState<number>(() => {
+		const saved = localStorage.getItem("globalCalculationYear");
+		if (saved) {
+			const parsed = parseInt(saved, 10);
+			if (!isNaN(parsed) && parsed >= 1900 && parsed <= 2100) return parsed;
+		}
+		return currentYear;
+	});
 	const userVillage = villages.find((v) => v.id === user?.village_id);
 	const userVillageName = userVillage
 		? userVillage.name
@@ -64,12 +74,6 @@ export const AnalyticsPage: React.FC = () => {
 			setSelectedVillage(selectedVillageId || "");
 		}
 	}, [selectedVillageId, isAdmin, user?.village_id, setSelectedVillageId]);
-
-	const handleVillageChange = (val: string) => {
-		if (!isAdmin) return;
-		setSelectedVillage(val);
-		setSelectedVillageId(val);
-	};
 
 	const [loading, setLoading] = useState(false);
 
@@ -151,20 +155,6 @@ export const AnalyticsPage: React.FC = () => {
 	useEffect(() => {
 		fetchData();
 	}, [fetchData]);
-
-	const villageOptions = isAdmin
-		? [
-				{
-					value: "",
-					label: villages.length
-						? `-- Toàn xã (${villages.length} thôn) --`
-						: "-- Toàn xã --",
-				},
-				...villages.map((v) => ({ value: v.id, label: v.name })),
-			]
-		: villages
-				.filter((v) => !user?.village_id || v.id === user.village_id)
-				.map((v) => ({ value: v.id, label: v.name }));
 
 	const totalCt = overview?.chuctho?.total ?? 0;
 	const ctReceived = overview?.chuctho?.received ?? 0;
@@ -352,7 +342,7 @@ export const AnalyticsPage: React.FC = () => {
 			className="space-y-6 animate-in fade-in pb-12 select-none"
 			style={{ ["--stat-accent" as any]: STAT_ACCENTS.cs }}
 		>
-			{/* 1. Thẻ Tiêu Đề Trang: Chuẩn đồng bộ 3 màn */}
+			{/* 1. Thẻ Tiêu Đề Trang: Chuẩn đồng bộ 3 màn (QLCS, QLNN, QLHK) */}
 			<div className="bg-white dark:bg-slate-900 p-5 rounded-3xl border border-slate-200/90 dark:border-slate-800 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-colors duration-150">
 				<div>
 					<div className="flex items-center gap-2.5 flex-wrap">
@@ -370,35 +360,27 @@ export const AnalyticsPage: React.FC = () => {
 					</div>
 					<p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1">
 						Phân tích số liệu đối tượng Chúc Thọ và Hưu Trí Xã Hội trên địa bàn{" "}
-						{isAdmin ? "Xã Đăk Hà" : userVillageName} (Năm {selectedYear})
+						{isAdmin ? (selectedVillage ? currentVillageLabel : "Xã Đăk Hà") : userVillageName} (Năm {selectedYear})
 					</p>
 				</div>
 
-				<div className="flex items-center gap-2.5 flex-wrap w-full sm:w-auto">
-					{/* Chọn năm tính toán: Dùng YearSelector từ bảng chính sách */}
-					<div className="shrink-0">
-						<YearSelector
-							year={selectedYear}
-							onYearChange={(y) => setSelectedYear(y)}
-						/>
-					</div>
-
-					{/* Dropdown Thôn: Chọn thôn nào xem thôn đó (mặc định Toàn xã "", chọn thôn cụ thể tô xanh kèm nút x) */}
-					{isAdmin && (
-						<div className="w-48">
-							<CustomSelect
-								value={selectedVillage}
-								onChange={(val) => handleVillageChange(String(val))}
-								options={villageOptions}
-								size="sm"
-								variant="filter"
-								defaultFilterValue=""
-								clearable={true}
-								onClear={() => handleVillageChange("")}
-								className="font-bold"
-							/>
-						</div>
-					)}
+				<div className="flex items-center gap-2.5 flex-wrap">
+					{isAdmin && (selectedVillageId || selectedVillage) ? (
+						<button
+							type="button"
+							onClick={() => {
+								setSelectedVillageId("");
+								setSelectedVillage("");
+								setActiveTab("villages");
+							}}
+							aria-label="Quay lại danh sách thôn"
+							title="Bấm để chọn thôn khác"
+							className="h-10 flex items-center justify-center gap-1.5 px-3.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-2xl text-xs font-bold transition-all active:scale-[0.99] cursor-pointer border border-slate-200 dark:border-slate-700"
+						>
+							<ArrowLeft className="w-4 h-4" strokeWidth={1.5} />
+							<span>Quay lại danh sách thôn</span>
+						</button>
+					) : null}
 
 					<button
 						type="button"
@@ -421,6 +403,47 @@ export const AnalyticsPage: React.FC = () => {
 							strokeWidth={1.5}
 						/>
 					</button>
+				</div>
+			</div>
+
+			{/* 2. Thanh Lọc Thời Gian: Chuẩn layout ProfileFilterBar trong bảng quản lý */}
+			<div className="relative z-20 flex flex-wrap items-center justify-between gap-3 bg-white dark:bg-slate-900 p-2.5 sm:p-3 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-xs transition-colors duration-150">
+				<div className="flex items-center gap-2.5 flex-wrap">
+					<div className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 dark:text-slate-400 pl-1">
+						<Calendar
+							className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400"
+							strokeWidth={1.5}
+						/>
+						<span>Năm tính toán:</span>
+					</div>
+
+					<div className="shrink-0">
+						<YearSelector
+							year={selectedYear}
+							onYearChange={(y) => setSelectedYear(y)}
+						/>
+					</div>
+
+					{selectedYear !== currentYear && (
+						<button
+							type="button"
+							onClick={() => setSelectedYear(currentYear)}
+							className="h-8 sm:h-9 px-2.5 py-1 text-xs rounded-xl flex items-center gap-1.5 text-slate-500 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer border border-slate-200/70 dark:border-slate-700/70"
+							title="Về năm hiện tại"
+						>
+							<RotateCcw className="w-3.5 h-3.5" strokeWidth={1.5} />
+							<span>Về năm {currentYear}</span>
+						</button>
+					)}
+				</div>
+
+				<div className="text-xs text-slate-400 dark:text-slate-500 font-medium hidden sm:flex items-center gap-2 pr-1">
+					<span>
+						Đối soát số liệu và mốc tuổi chính sách theo năm{" "}
+						<strong className="text-emerald-600 dark:text-emerald-400 font-bold tabular-nums">
+							{selectedYear}
+						</strong>
+					</span>
 				</div>
 			</div>
 
