@@ -33,8 +33,7 @@
         ]
       }
     ],
-    "artifactName": "${productName}-Windows-${version}-Setup.${ext}",
-    "icon": "public/electron-vite.svg"
+    "artifactName": "${productName}-Windows-${version}-Setup.${ext}"
   },
   "nsis": {
     "oneClick": false,
