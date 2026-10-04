@@ -338,7 +338,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
 
 	return createPortal(
 		<div
-			className="fixed inset-0 !m-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-[rgba(15,23,42,0.45)] dark:bg-[rgba(0,0,0,0.6)] select-none animate-in fade-in duration-150"
+			className="fixed inset-0 !m-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-slate-950/50 dark:bg-black/70 backdrop-blur-xs select-none animate-in fade-in duration-150"
 			onClick={(e) => {
 				if (e.target === e.currentTarget) onClose();
 			}}

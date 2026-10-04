@@ -107,7 +107,7 @@ export const Modal: React.FC<ModalProps> = ({
 		<div
 			className={clsx(
 				"fixed inset-0 flex items-center justify-center p-4",
-				"bg-[rgba(15,23,42,0.45)] dark:bg-[rgba(0,0,0,0.6)]",
+				"bg-slate-950/50 dark:bg-black/70 backdrop-blur-xs",
 				"animate-in fade-in duration-150 select-none",
 			)}
 			style={{ zIndex }}

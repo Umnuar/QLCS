@@ -103,7 +103,7 @@ export const ExportSettingsModal: React.FC<ExportSettingsModalProps> = ({
 				: "Xuất biểu mẫu chính sách chuẩn Xã Đăk Hà";
 
 	return createPortal(
-		<div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/45 dark:bg-black/60 select-none animate-in fade-in duration-150">
+		<div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/50 dark:bg-black/70 backdrop-blur-xs select-none animate-in fade-in duration-150">
 			<div
 				ref={modalRef}
 				role="dialog"

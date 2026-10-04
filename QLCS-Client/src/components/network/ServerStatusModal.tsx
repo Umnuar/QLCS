@@ -8,6 +8,7 @@ import {
 	X,
 } from "lucide-react";
 import type React from "react";
+import { createPortal } from "react-dom";
 import { API_BASE_URL } from "../../api/apiClient";
 
 interface ServerStatusModalProps {
@@ -25,8 +26,13 @@ export const ServerStatusModal: React.FC<ServerStatusModalProps> = ({
 }) => {
 	if (!isOpen) return null;
 
-	return (
-		<div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[rgba(15,23,42,0.45)] dark:bg-[rgba(0,0,0,0.6)] animate-in fade-in select-none">
+	return createPortal(
+		<div
+			className="fixed inset-0 !m-0 z-50 flex items-center justify-center p-4 bg-slate-950/50 dark:bg-black/70 backdrop-blur-xs select-none animate-in fade-in duration-150"
+			onClick={(e) => {
+				if (e.target === e.currentTarget) onClose();
+			}}
+		>
 			<div
 				className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden"
 				onClick={(e) => e.stopPropagation()}
@@ -146,7 +152,8 @@ export const ServerStatusModal: React.FC<ServerStatusModalProps> = ({
 					</div>
 				</div>
 			</div>
-		</div>
+		</div>,
+		document.body,
 	);
 };
 

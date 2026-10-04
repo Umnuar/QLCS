@@ -169,7 +169,7 @@ export function ModalProvider({ children }: { children: ReactNode }) {
 				modalState.isOpen &&
 				createPortal(
 					<div
-						className="fixed inset-0 z-[9999999] flex items-center justify-center p-4 bg-[rgba(15,23,42,0.45)] dark:bg-[rgba(0,0,0,0.6)] animate-in fade-in"
+						className="fixed inset-0 z-[9999999] flex items-center justify-center p-4 bg-slate-950/50 dark:bg-black/70 backdrop-blur-xs select-none animate-in fade-in duration-150"
 						onClick={(e) => {
 							if (e.target === e.currentTarget) handleClose(false);
 						}}

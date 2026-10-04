@@ -705,7 +705,7 @@ export function ImportModal({
 			{isImportModalOpen &&
 				createPortal(
 					<div
-						className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[rgba(15,23,42,0.45)] dark:bg-[rgba(0,0,0,0.6)] animate-in fade-in select-none"
+						className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/50 dark:bg-black/70 backdrop-blur-xs select-none animate-in fade-in duration-150"
 						onClick={(e) => {
 							if (
 								e.target === e.currentTarget &&
@@ -1569,7 +1569,7 @@ export function ImportModal({
 			{/* Kết Quả Import Thành Công Hoặc Cảnh Báo */}
 			{importResult &&
 				createPortal(
-					<div className="fixed inset-0 z-[999999] flex items-center justify-center p-4 bg-[rgba(15,23,42,0.45)] dark:bg-[rgba(0,0,0,0.6)] animate-in fade-in">
+					<div className="fixed inset-0 z-[999999] flex items-center justify-center p-4 bg-slate-950/50 dark:bg-black/70 backdrop-blur-xs select-none animate-in fade-in duration-150">
 						<div
 							className={clsx(
 								"rounded-3xl shadow-2xl w-full max-w-3xl overflow-hidden flex flex-col max-h-[80vh] border zoom-in-95 duration-150",
