@@ -183,7 +183,7 @@ export const ProfileRow = React.memo(function ProfileRow({
 			)}
 			title="Bấm để xem và chỉnh sửa thông tin chi tiết hồ sơ"
 		>
-			{/* CỘT 1: Checkbox (Sticky left-0, w-10) */}
+			{/* CỘT 1: Checkbox (Sticky left-0, w-12 / 48px) */}
 			<td
 				onClick={(e) => e.stopPropagation()}
 				className={clsx(
@@ -201,16 +201,26 @@ export const ProfileRow = React.memo(function ProfileRow({
 				/>
 			</td>
 
-			{/* CỘT 2: STT (Không sticky) */}
-			<td className="w-12 py-3 px-2 text-center border-b border-slate-100 dark:border-slate-800/80 tabular-nums text-xs font-semibold text-slate-500 dark:text-slate-400 whitespace-nowrap">
+			{/* CỘT 2: STT (Sticky left-12, w-14 / 56px) */}
+			<td
+				className={clsx(
+					TABLE_STYLES.stickyLeftStt,
+					stickyBgClass,
+				)}
+			>
 				{(currentPage - 1) * itemsPerPage + idx + 1}
 			</td>
 
-			{/* CỘT 3: Họ và Tên */}
-			<td className="min-w-[160px] py-3 px-3 text-left border-b border-slate-100 dark:border-slate-800/80 whitespace-nowrap">
+			{/* CỘT 3: Họ và Tên (Sticky left-[104px], min-w-[220px]) */}
+			<td
+				className={clsx(
+					TABLE_STYLES.stickyLeftName,
+					stickyBgClass,
+				)}
+			>
 				<div className="flex flex-col justify-center py-0.5">
 					<div className="flex items-center gap-2">
-						<span className="font-bold text-slate-900 dark:text-slate-100 text-sm hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
+						<span className="font-bold text-slate-900 dark:text-slate-100 text-sm hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors truncate">
 							{profile.name}
 						</span>
 
@@ -280,15 +290,23 @@ export const ProfileRow = React.memo(function ProfileRow({
 				)}
 			</td>
 
-			{/* CỘT 8: Nơi cư trú */}
-			<td className="py-3 px-3 text-left border-b border-slate-100 dark:border-slate-800/80 whitespace-nowrap">
-				<div className="flex items-center gap-1.5">
+			{/* CỘT 8: Nơi cư trú (Co giãn, cho phép 2 dòng) */}
+			<td className="py-2.5 px-3 text-left border-b border-slate-100 dark:border-slate-800/80 align-middle">
+				<div className="flex items-start gap-1.5">
 					{villageName ? (
-						<span className="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-semibold bg-emerald-50/70 text-emerald-700 border border-emerald-200/80 dark:bg-emerald-950/50 dark:text-emerald-300 dark:border-emerald-800/70 shrink-0">
+						<span className="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-semibold bg-emerald-50/70 text-emerald-700 border border-emerald-200/80 dark:bg-emerald-950/50 dark:text-emerald-300 dark:border-emerald-800/70 shrink-0 mt-0.5">
 							{villageName}
 						</span>
 					) : null}
-					<span className="text-xs text-slate-700 dark:text-slate-300 font-medium truncate max-w-xs">
+					<span
+						className="text-xs text-slate-700 dark:text-slate-300 font-medium line-clamp-2 leading-relaxed break-words"
+						title={String(
+							profile.residence ||
+								profile.currentAddress ||
+								profile.current_address ||
+								"—",
+						)}
+					>
 						{String(
 							profile.residence ||
 								profile.currentAddress ||

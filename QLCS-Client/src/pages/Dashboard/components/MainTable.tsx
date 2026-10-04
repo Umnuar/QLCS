@@ -1,4 +1,4 @@
-﻿import clsx from "clsx";
+import clsx from "clsx";
 import {
 	ChevronDown,
 	ChevronsUpDown,
@@ -170,9 +170,41 @@ export function MainTable({
 			{/* 2. Bảng Dữ Liệu Chuẩn Hóa theo QLNN (Kinh tế) */}
 			<div className={TABLE_STYLES.scrollContainer}>
 				<table className={TABLE_STYLES.table}>
+					<colgroup>
+						{/* Cột 1: Checkbox (48px cố định) */}
+						<col style={{ width: 48 }} />
+						{/* Cột 2: STT (56px cố định) */}
+						<col style={{ width: 56 }} />
+						{/* Cột 3: Họ và Tên (min 220px, co giãn tỷ lệ ~1) */}
+						<col style={{ minWidth: 220, width: "22%" }} />
+						{/* Cột 4: Mức tuổi / Diện hưởng (120px cố định) */}
+						<col style={{ width: 120 }} />
+						{/* Cột 5: Giới tính (90px cố định) */}
+						<col style={{ width: 90 }} />
+						{/* Cột 6: Năm sinh (120px cố định) */}
+						<col style={{ width: 120 }} />
+						{/* Cột 7: Số CCCD (160px cố định) */}
+						<col style={{ width: 160 }} />
+						{/* Cột 8: Nơi cư trú (min 240px, max 420px, co giãn tỷ lệ ~1.2) */}
+						<col style={{ minWidth: 240, maxWidth: 420, width: "26.4%" }} />
+						{/* Cột 9: Thông tin theo Tab */}
+						{activeTab === "chuctho" ? (
+							<col style={{ width: 140 }} />
+						) : (
+							<>
+								<col style={{ width: 90 }} />
+								<col style={{ width: 110 }} />
+								<col style={{ width: 140 }} />
+							</>
+						)}
+						{/* Cột 10: Quà tặng (130px cố định) */}
+						<col style={{ width: 130 }} />
+						{/* Cột 11: Thao tác (96px cố định) */}
+						<col style={{ width: 96 }} />
+					</colgroup>
 					<thead className={TABLE_STYLES.thead}>
 						<tr className={TABLE_STYLES.headerRow}>
-							{/* CỘT 1: Checkbox Sticky (w-10) */}
+							{/* CỘT 1: Checkbox Sticky (w-12 / 48px) */}
 							<th className={TABLE_STYLES.thStickyLeft}>
 								<input
 									type="checkbox"
@@ -191,17 +223,16 @@ export function MainTable({
 								/>
 							</th>
 
-							{/* CỘT 2: STT */}
-							<th className={clsx(TABLE_STYLES.thCenter, "w-12 tabular-nums")}>
+							{/* CỘT 2: STT Sticky (w-14 / 56px) */}
+							<th className={TABLE_STYLES.thStickyLeftStt}>
 								STT
 							</th>
 
-							{/* CỘT 3: Họ và Tên */}
+							{/* CỘT 3: Họ và Tên Sticky (min-w-[220px]) */}
 							<th
 								className={clsx(
-									TABLE_STYLES.th,
+									TABLE_STYLES.thStickyLeftName,
 									TABLE_STYLES.thSortable,
-									"min-w-[160px]",
 								)}
 								onClick={() => handleSort("name")}
 							>

@@ -350,7 +350,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
 				aria-labelledby="profile-modal-title"
 				tabIndex={-1}
 				onKeyDown={handleContainerKeyDown}
-				className="w-full max-w-3xl h-[88vh] max-h-[88vh] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl flex flex-col overflow-hidden text-slate-900 dark:text-slate-100 transition-colors duration-150 animate-in zoom-in-95 duration-150 relative outline-hidden"
+				className="w-full max-w-3xl h-auto max-h-[90vh] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl flex flex-col overflow-hidden text-slate-900 dark:text-slate-100 transition-colors duration-150 animate-in zoom-in-95 duration-150 relative outline-hidden"
 				onClick={(e) => e.stopPropagation()}
 			>
 				{/* Top Bar cố định: Tiêu đề, icon User, badge mốc tuổi & năm tính toán, Tab chuyển Thông Tin / Lịch Sử, nút đóng X */}
@@ -755,7 +755,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
 				</div>
 
 				{/* Bottom Bar cố định: Nút Hủy và Lưu thay đổi */}
-				<div className="px-6 py-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-3 shrink-0 bg-slate-50/70 dark:bg-slate-950/70">
+				<div className="px-6 py-4 border-t border-slate-200/80 dark:border-slate-800 flex items-center justify-end gap-3 shrink-0 bg-slate-50 dark:bg-slate-950">
 					<button
 						type="button"
 						onClick={onClose}
