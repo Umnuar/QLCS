@@ -3,6 +3,7 @@ import {
 	ArrowDownCircle,
 	Award,
 	Clock,
+	Eye,
 	FileSpreadsheet,
 	Filter,
 	History,
@@ -267,6 +268,14 @@ export const AuditLogPage: React.FC = () => {
 					dotBg: "bg-amber-500 ring-amber-100 dark:ring-amber-950",
 					icon: FileSpreadsheet,
 				};
+			case "REVEAL_CCCD":
+				return {
+					label: "Xem CCCD",
+					colorBadge:
+						"bg-indigo-50 text-indigo-700 dark:bg-indigo-950/80 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800",
+					dotBg: "bg-indigo-500 ring-indigo-100 dark:ring-indigo-950",
+					icon: Eye,
+				};
 			default:
 				return {
 					label: action,
@@ -435,6 +444,26 @@ export const AuditLogPage: React.FC = () => {
 								</span>
 							</div>
 						)}
+						{newVals.residence && (
+							<div className="p-2 rounded-xl bg-emerald-50/50 dark:bg-emerald-950/30 border border-emerald-200/50 dark:border-emerald-800/40 text-xs flex flex-col">
+								<span className="text-[11px] font-semibold text-emerald-800 dark:text-emerald-300">
+									Hộ khẩu thường trú
+								</span>
+								<span className="font-bold text-slate-900 dark:text-slate-100 mt-0.5 truncate">
+									{newVals.residence}
+								</span>
+							</div>
+						)}
+						{newVals.ethnicity && (
+							<div className="p-2 rounded-xl bg-emerald-50/50 dark:bg-emerald-950/30 border border-emerald-200/50 dark:border-emerald-800/40 text-xs flex flex-col">
+								<span className="text-[11px] font-semibold text-emerald-800 dark:text-emerald-300">
+									Dân tộc
+								</span>
+								<span className="font-bold text-slate-900 dark:text-slate-100 mt-0.5">
+									{newVals.ethnicity}
+								</span>
+							</div>
+						)}
 					</div>
 				</div>
 			);
@@ -484,17 +513,33 @@ export const AuditLogPage: React.FC = () => {
 		}
 
 		// 4. Xóa hồ sơ
-		if (item.action === "DELETE" && Object.keys(oldVals).length > 0) {
+		if (
+			item.action === "DELETE" ||
+			item.action === "SOFT_DELETE" ||
+			item.action === "BULK_SOFT_DELETE"
+		) {
+			const displayName =
+				oldVals.name ||
+				(typeof item.old_data === "object" && item.old_data?.name) ||
+				item.profile_id;
+			const displayDob =
+				oldVals.dob ||
+				(typeof item.old_data === "object" && item.old_data?.dob);
+			const displayVillage =
+				oldVals.village_name ||
+				(typeof item.old_data === "object" && item.old_data?.village_name);
+			const displayCccd =
+				oldVals.cccd_last4 ||
+				(typeof item.old_data === "object" && item.old_data?.cccd_last4);
+
 			return (
 				<div className="mt-2 p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-xs text-rose-800 dark:text-rose-200 space-y-1">
-					<div className="font-bold">Đã xóa hồ sơ:</div>
+					<div className="font-bold">Đã chuyển vào Thùng rác:</div>
 					<div>
-						Hồ sơ: <strong>{oldVals.name || item.profile_id}</strong>
-						{oldVals.dob && <span> — Năm sinh: {oldVals.dob}</span>}
-						{oldVals.cccd_last4 && (
-							<span> — CCCD: •••• {oldVals.cccd_last4}</span>
-						)}
-						{oldVals.village_name && <span> — {oldVals.village_name}</span>}
+						Đối tượng: <strong>{displayName}</strong>
+						{displayDob && <span> ({displayDob})</span>}
+						{displayVillage && <span> — {displayVillage}</span>}
+						{displayCccd && <span> — CCCD: •••• {displayCccd}</span>}
 					</div>
 					{item.note && (
 						<div className="text-[11px] text-rose-600 dark:text-rose-400 italic">
@@ -507,25 +552,22 @@ export const AuditLogPage: React.FC = () => {
 
 		// 5. Khôi phục hồ sơ
 		if (item.action === "RESTORE") {
+			const displayName =
+				newVals.name ||
+				oldVals.name ||
+				(typeof item.new_data === "object" && item.new_data?.name) ||
+				(typeof item.old_data === "object" && item.old_data?.name) ||
+				item.profile_id;
 			return (
 				<div className="mt-2 p-3 rounded-xl bg-purple-500/10 border border-purple-500/30 text-xs text-purple-800 dark:text-purple-200">
 					<span>
-						Khôi phục hồ sơ:{" "}
-						<strong>{newVals.name || oldVals.name || item.profile_id}</strong>
+						Khôi phục bản ghi: <strong>{displayName}</strong>
 					</span>
 					{item.note && (
 						<div className="text-[11px] mt-1 text-purple-600 dark:text-purple-400">
 							{item.note}
 						</div>
 					)}
-				</div>
-			);
-		}
-
-		if (item.note) {
-			return (
-				<div className="text-xs text-slate-600 dark:text-slate-400 mt-1">
-					{item.note}
 				</div>
 			);
 		}
@@ -839,6 +881,18 @@ export const AuditLogPage: React.FC = () => {
 								? `${dateObj.toLocaleTimeString("vi-VN")} • ${dateObj.toLocaleDateString("vi-VN")}`
 								: item.created_at;
 
+							const villageName =
+								item.village?.name ||
+								villages.find((v) => v.id === item.village_id)?.name ||
+								(typeof item.old_values === "object" &&
+									item.old_values?.village_name) ||
+								(typeof item.new_values === "object" &&
+									item.new_values?.village_name) ||
+								(typeof item.old_data === "object" &&
+									item.old_data?.village_name) ||
+								(typeof item.new_data === "object" &&
+									item.new_data?.village_name);
+
 							return (
 								<div key={item.id} className="relative pl-6 group">
 									{/* Node chấm tròn Timeline */}
@@ -849,8 +903,14 @@ export const AuditLogPage: React.FC = () => {
 									</div>
 
 									{/* Thẻ Nội Dung Sự Kiện */}
-									<div className="bg-slate-50/60 dark:bg-slate-950/60 p-4.5 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 shadow-xs hover:border-emerald-500/40 transition-all space-y-2">
-										{/* Header Thẻ: Loại thao tác, Loại chính sách & Thời gian */}
+									<div
+										className={`bg-slate-50/60 dark:bg-slate-950/60 p-4.5 rounded-2xl border shadow-xs transition-all space-y-2 ${
+											item.action === "CREATE"
+												? "border-emerald-500/80 dark:border-emerald-500/60"
+												: "border-slate-200/80 dark:border-slate-800/80 hover:border-slate-300 dark:hover:border-slate-700"
+										}`}
+									>
+										{/* Header Thẻ: Loại thao tác & Thời gian */}
 										<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
 											<div className="flex items-center gap-2 flex-wrap">
 												<span
@@ -859,18 +919,12 @@ export const AuditLogPage: React.FC = () => {
 													{cfg.label}
 												</span>
 
-												<span className="px-2.5 py-0.5 rounded-lg text-[11px] font-bold bg-slate-200/70 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
-													{item.profile_type === "htxh"
-														? "Hưu Trí Xã Hội"
-														: "Chúc Thọ"}
-												</span>
-
 												<span className="text-xs font-black text-slate-800 dark:text-slate-100">
 													{item.note ||
-														`${cfg.label} hồ sơ ${
+														`${cfg.label} đối tượng ${
 															item.profile_type === "htxh"
-																? "Hưu Trí Xã Hội"
-																: "Chúc Thọ"
+																? "hưu trí xã hội"
+																: "chúc thọ"
 														}`}
 												</span>
 											</div>
@@ -884,7 +938,7 @@ export const AuditLogPage: React.FC = () => {
 										{/* Dịch JSON Diff Thân Thiện */}
 										{renderFriendlyDiff(item)}
 
-										{/* Footer Thẻ: Cán bộ thực hiện, Đơn vị thôn */}
+										{/* Footer Thẻ: Người thực hiện, Đơn vị, IP */}
 										<div className="pt-2 border-t border-slate-200/60 dark:border-slate-800/60 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 flex-wrap gap-2">
 											<div className="flex items-center gap-3">
 												<span className="flex items-center gap-1 font-semibold text-slate-700 dark:text-slate-300">
@@ -899,24 +953,23 @@ export const AuditLogPage: React.FC = () => {
 													</span>
 												</span>
 
-												{(item.village?.name ||
-													(typeof item.old_data === "object" &&
-														item.old_data?.village_name) ||
-													(typeof item.new_data === "object" &&
-														item.new_data?.village_name)) && (
+												{villageName && (
 													<span className="flex items-center gap-1">
 														<MapPin
 															className="w-3.5 h-3.5 text-blue-500"
 															strokeWidth={1.5}
 														/>
-														<span>
-															{item.village?.name ||
-																item.old_data?.village_name ||
-																item.new_data?.village_name}
-														</span>
+														<span>{villageName}</span>
 													</span>
 												)}
 											</div>
+
+											<span className="font-mono text-slate-400">
+												IP:{" "}
+												{(item as any).ip_address ||
+													(item as any).ip ||
+													"::ffff:127.0.0.1"}
+											</span>
 										</div>
 									</div>
 								</div>

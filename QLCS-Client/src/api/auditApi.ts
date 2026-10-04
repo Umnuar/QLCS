@@ -18,6 +18,10 @@ export interface AuditLogItem {
 	village_id?: string;
 	old_data?: any;
 	new_data?: any;
+	old_values?: any;
+	new_values?: any;
+	ip_address?: string;
+	ip?: string;
 	note?: string;
 	created_at: string;
 	user?: {
