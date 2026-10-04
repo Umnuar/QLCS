@@ -749,12 +749,7 @@ export const AuditLogPage: React.FC = () => {
 						value={villageFilter}
 						onChange={(val) => setVillageFilter(String(val))}
 						options={[
-							{
-								value: "",
-								label: villages.length
-									? `Toàn xã (${villages.length} thôn)`
-									: "Toàn xã (Tất cả thôn)",
-							},
+							{ value: "", label: "Toàn xã (Tất cả thôn)" },
 							...villages.map((v) => ({ value: v.id, label: v.name })),
 						]}
 						placeholder="Địa bàn thôn"
@@ -811,7 +806,9 @@ export const AuditLogPage: React.FC = () => {
 						{ value: "", label: "Tất cả cán bộ thực hiện" },
 						...userList.map((u) => ({
 							value: u.username,
-							label: u.username,
+							label: u.full_name
+								? `${u.full_name} (${u.username})`
+								: u.username,
 						})),
 					]}
 					searchable
