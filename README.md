@@ -1,154 +1,225 @@
-# Hệ Thống Quản Lý Chính Sách (QLCS v3.0.0)
+# Quản Lý Chính Sách Người Cao Tuổi — Xã Đăk Hà (QLCS)
 
-> **Cơ quan chủ quản:** Ủy ban Nhân dân Xã Đăk Hà, Tỉnh Kon Tum  
-> **Ứng dụng:** Quản Lý Chế Độ Chính Sách Người Cao Tuổi & Hưu Trí Xã Hội  
-> **Phiên bản:** v3.0.0 (Enterprise Desktop & Local Web)  
+Hệ thống số hóa, rà soát và thực hiện chế độ chính sách chúc thọ và hưu trí xã hội cho người cao tuổi tại xã Đăk Hà.
 
----
-
-## ⚠️ Thông Báo Bản Quyền & Giấy Phép (Copyright & License Notice)
+![Phiên bản](https://img.shields.io/badge/phiên_bản-v3.0.0-emerald) ![Nền tảng](https://img.shields.io/badge/nền_tảng-Web%20%7C%20Electron-blue) ![Giấy phép](https://img.shields.io/badge/giấy_phép-Proprietary-rose)
 
 > [!IMPORTANT]
-> **DỰ ÁN KHÔNG ÁP DỤNG GIẤY PHÉP MÃ NGUỒN MỞ MIT HAY BẤT KỲ GIẤY PHÉP TỰ DO NÀO KHÁC.**  
-> Kho lưu trữ này được đăng tải công khai (Public Repository) nhằm mục đích lưu trữ, minh bạch kỹ thuật và tham khảo kiến trúc.  
-> **Bản quyền thuộc về Ủy ban Nhân dân Xã Đăk Hà và Tác giả (Umnuar). Toàn bộ quyền được bảo lưu (All Rights Reserved).**  
-> Nghiêm cấm mọi hành vi sao chép, phân phối lại, chỉnh sửa hoặc sử dụng vào mục đích thương mại khi chưa có văn bản chấp thuận chính thức từ tác giả và cơ quan chủ quản.
+> **Bản quyền thuộc về UBND Xã Đăk Hà và Tác giả (Umnuar). Toàn bộ quyền được bảo lưu.**  
+> Dự án độc quyền, không áp dụng giấy phép mã nguồn mở (như MIT, Apache). Chi tiết xem tại mục [Giấy phép](#giấy-phép).
 
 ---
 
-## 1. Giới Thiệu Tổng Quan
+## Mục lục
 
-**Hệ thống Quản Lý Chính Sách (QLCS)** là giải pháp phần mềm chuyên dụng phục vụ công tác rà soát, đối soát dữ liệu và thực hiện chế độ chính sách cho người cao tuổi tại địa bàn xã Đăk Hà. Hệ thống giải quyết bài toán quản lý danh sách chúc thọ, trợ cấp hưu trí xã hội, tự động hóa quy trình nhập liệu từ các biểu mẫu Excel phức tạp và đảm bảo an toàn thông tin định danh công dân.
-
-### Điểm nổi bật:
-- **Tự động phân loại mốc tuổi:** Tự động tính tuổi theo năm tính toán chính sách hiện hành để xếp hồ sơ vào các diện chúc thọ (70, 75, 80, 85, 90, 95, 100+ tuổi) hoặc diện hưu trí xã hội (70–74 tuổi, từ 75 tuổi trở lên).
-- **Nhập dữ liệu Excel đa luồng (Web Workers):** Xử lý tệp bảng tính lớn nhanh chóng trên client, không làm đơ giao diện; thuật toán đối soát tự động nhận diện và khớp cột thông minh.
-- **Bảo mật dữ liệu công dân chuẩn ASVS:** Mã hóa số CCCD bằng thuật toán `AES-256-GCM`, mặc định che giấu dữ liệu `••••••••1234`, nhật ký kiểm toán bất biến (`profile_audit_log`) tuân thủ Nghị định 13/2023/NĐ-CP.
-- **Thống nhất hệ sinh thái Đăk Hà:** Đồng bộ giao diện Dark/Light mode, thẻ KPI số liệu, biểu đồ phân tích và quy chuẩn lớp phủ modal với 2 hệ thống vệ tinh: *Quản Lý Hộ Khẩu (QLHK)* và *Quản Lý Nông Nghiệp (QLNN)*.
+- [Tổng quan](#tổng-quan)
+- [Ảnh chụp màn hình](#ảnh-chụp-màn-hình)
+- [Tính năng](#tính-năng)
+- [Kiến trúc](#kiến-trúc)
+- [Bắt đầu nhanh](#bắt-đầu-nhanh)
+- [Cấu trúc thư mục](#cấu-trúc-thư-mục)
+- [Bảo mật](#bảo-mật)
+- [Trạng thái và giới hạn đã biết](#trạng-thái-và-giới-hạn-đã-biết)
+- [Người duy trì và liên hệ](#người-duy-trì-và-liên-hệ)
+- [Giấy phép](#giấy-phép)
 
 ---
 
-## 2. Kiến Trúc Hệ Thống (Monorepo)
+## Tổng quan
 
-Hệ thống được tổ chức theo cấu trúc Monorepo thống nhất:
+Hệ thống Quản Lý Chính Sách (QLCS) hỗ trợ cán bộ cấp xã và thôn quản lý hồ sơ chính sách người cao tuổi tại xã Đăk Hà. Ứng dụng giải quyết bài toán rà soát mốc chúc thọ theo năm, đối soát diện hưu trí xã hội, tự động hóa xử lý danh sách từ bảng tính Excel và quản lý dữ liệu tập trung.
 
+### Hệ sinh thái Đăk Hà
+
+| Ứng dụng | Vai trò | Kho mã nguồn |
+| :--- | :--- | :--- |
+| **QLCS** | Quản lý chế độ chính sách người cao tuổi (chúc thọ và hưu trí xã hội) | [Umnuar/QLCS](https://github.com/Umnuar/QLCS) |
+| **QLHK** | Quản lý thông tin hộ khẩu, nhân khẩu và biến động cư trú | [Umnuar/QLHK](https://github.com/Umnuar/QLHK) |
+| **QLNN** | Quản lý quy hoạch nông nghiệp, diện tích cây trồng và vật nuôi | [Umnuar/QLNN](https://github.com/Umnuar/QLNN) |
+
+---
+
+## Ảnh chụp màn hình
+
+| Danh sách Hồ Sơ Chúc Thọ | Bảng Thống Kê & Đối Soát |
+| :---: | :---: |
+| ![Hồ Sơ Chúc Thọ](docs/qa/screenshots/06-dashboard-chuctho.png) | ![Thống Kê](docs/qa/screenshots/05-analytics-village-selected.png) |
+
+| Danh sách Hưu Trí Xã Hội | Quản Lý Thôn |
+| :---: | :---: |
+| ![Hưu Trí Xã Hội](docs/qa/screenshots/09-dashboard-htxh.png) | ![Quản Lý Thôn](docs/qa/screenshots/03-villages-overview.png) |
+
+---
+
+## Tính năng
+
+### Quản lý hồ sơ chính sách
+- **Hồ sơ chúc thọ**: Theo dõi danh sách theo mốc tuổi (70, 75, 80, 85, 90, 95, 100, trên 100), tính tuổi tự động theo năm tính toán và ngày sinh, đánh dấu nhận quà.
+- **Hưu trí xã hội**: Quản lý các diện trợ cấp (từ 75 tuổi trở lên, 70–74 tuổi hộ nghèo/cận nghèo, bảo trợ xã hội, hưu trí, tuất bảo hiểm, người có công).
+- **Bộ lọc đa tiêu chí**: Lọc theo thôn, độ tuổi, giới tính, dân tộc, nơi cư trú và trạng thái chi trả.
+- **Thùng rác**: Lưu trữ hồ sơ đã xóa mềm, hỗ trợ khôi phục hoặc xóa vĩnh viễn.
+
+### Xử lý dữ liệu & Báo cáo
+- **Nhập dữ liệu Excel**: Kéo thả tệp `.xlsx`, `.xls`, `.csv`, tự động khớp cột, kiểm tra trùng lặp theo mã băm CCCD, xử lý nền qua Web Worker.
+- **Xuất bảng tính**: Xuất danh sách theo mẫu chuẩn phục vụ chi trả và báo cáo.
+- **Thống kê & Đối soát**: Tổng hợp chỉ số KPI, tỷ lệ đã nhận/chưa nhận theo từng thôn hoặc toàn xã.
+
+### Quản trị & Giám sát
+- **Quản lý địa bàn**: Danh sách thôn nạp động từ CSDL, gán tài khoản phụ trách từng thôn.
+- **Phân quyền theo vai trò**: Cán bộ Xã (Admin) quản trị toàn xã; Trưởng Thôn quản lý dữ liệu trong phạm vi thôn được giao.
+- **Nhật ký hoạt động**: Ghi vết thời gian, địa chỉ IP, cán bộ và nội dung thay đổi dữ liệu.
+
+---
+
+## Kiến trúc
+
+```mermaid
+graph TD
+    Client["QLCS-Client (React 18 + Vite + Electron)"]
+    API["QLCS-Backend (Express + TypeScript)"]
+    DB[("PostgreSQL / Supabase")]
+    Worker["Web Worker (Xử lý Excel nền)"]
+
+    Client -->|"REST API / JWT"| API
+    Client -->|"Phân tích dữ liệu"| Worker
+    API -->|"Prisma ORM"| DB
 ```
-QLCS/
-├── QLCS-Client/                 # Ứng dụng Frontend (React + Vite + Electron)
-│   ├── electron/                # Khung Desktop Electron (main & preload)
-│   ├── src/
-│   │   ├── api/                 # Axios HTTP client kết nối Backend
-│   │   ├── components/          # Thư viện UI components (Modal, Toast, ExcelDropzone...)
-│   │   ├── pages/               # Các trang: Dashboard, Thống Kê, Thôn, Lịch Sử, Cài Đặt
-│   │   ├── workers/             # Web Workers xử lý phân tích Excel nền
-│   │   ├── validation/          # Zod schema kiểm tra dữ liệu đầu vào
-│   │   └── utils/               # Tiện ích mã hóa, định dạng ngày tháng, xuất Excel
-│   ├── package.json
-│   └── vite.config.ts
-│
-├── QLCS-Backend/                # Máy chủ Backend (Node.js + Express + Prisma)
-│   ├── prisma/                  # Lược đồ cơ sở dữ liệu (schema.prisma)
-│   ├── scripts/                 # Kịch bản bảo trì, seed CSDL, xoay khóa AES-256
-│   ├── src/
-│   │   ├── controllers/         # Điều khiển nghiệp vụ (profiles, htxh, excel, analytics...)
-│   │   ├── middlewares/         # Xác thực JWT, phân quyền thôn, Helmet CSP, ghi log
-│   │   ├── routes/              # Định tuyến RESTful API
-│   │   └── utils/               # Tiện ích mã hóa AES-256, ký JWT, kiểm toán
-│   ├── package.json
-│   └── tsconfig.json
-│
-├── docs/                        # Tài liệu đặc tả kỹ thuật, hướng dẫn UI & quy chuẩn
-├── tests/                       # Kịch bản kiểm thử tích hợp & an ninh
-├── SECURITY.md                  # Chính sách bảo mật & quy trình báo cáo lỗ hổng
-└── README.md                    # Tài liệu tổng quan dự án
-```
+
+### Bảng công nghệ
+
+| Thành phần | Công nghệ | Phiên bản |
+| :--- | :--- | :--- |
+| Giao diện người dùng | React, Tailwind CSS, Lucide React | React 18.2.0, Tailwind 4.2.4 |
+| Ứng dụng Desktop | Electron, electron-builder | Electron 42.1.0 |
+| Công cụ xây dựng Client | Vite, TypeScript, Vitest | Vite 5.1.6, TS 5.2.2, Vitest 4.1.6 |
+| Máy chủ API | Node.js, Express, tsx | Node >= 18, Express 4.21.0 |
+| Cơ sở dữ liệu & ORM | PostgreSQL, Prisma ORM | Prisma 6.0.0 |
+| Bảo mật & Mã hóa | Crypto (AES-256-GCM), bcryptjs, jsonwebtoken | bcryptjs 2.4.3, JWT 9.0.2 |
 
 ---
 
-## 3. Công Nghệ Sử Dụng
+## Bắt đầu nhanh
 
-### Frontend (`QLCS-Client`)
-- **Core:** React 18, TypeScript, Vite
-- **Styling:** Tailwind CSS, Lucide React Icons, Clsx
-- **State & Data:** React Hooks, Web Workers API, Axios
-- **Desktop Runtime:** Electron (hỗ trợ đóng gói ứng dụng máy trạm Windows)
-- **Kiểm thử:** Vitest (107 bài test đơn vị & logic tính tuổi tự động)
+### Yêu cầu môi trường
+- Node.js phiên bản `>= 18.0.0`
+- Trình quản lý gói `npm`
+- Cơ sở dữ liệu PostgreSQL (hoặc Supabase)
 
-### Backend (`QLCS-Backend`)
-- **Core:** Node.js, Express, TypeScript, tsx
-- **CSDL & ORM:** SQLite / PostgreSQL, Prisma ORM
-- **An ninh & Bảo mật:** Helmet, CORS, Crypto (AES-256-GCM), bcryptjs, jsonwebtoken (JWT)
-- **Xử lý tệp:** ExcelJS, xlsx-js-style
-
----
-
-## 4. Hướng Dẫn Cài Đặt & Vận Hành
-
-### 4.1. Yêu cầu môi trường
-- **Node.js:** Phiên bản `>= 18.0.0` (khuyến nghị Node 20 LTS hoặc Node 22)
-- **Trình quản lý gói:** `npm` (kèm theo Node.js)
-- **Hệ điều hành:** Windows 10/11 (đã tối ưu hóa đường dẫn và dịch vụ)
-
-### 4.2. Khởi chạy Máy chủ Backend (`QLCS-Backend`)
+### 1. Cài đặt
 
 ```bash
-# 1. Di chuyển vào thư mục backend
+# Cài đặt phụ thuộc cho Backend
 cd QLCS-Backend
-
-# 2. Cài đặt các gói phụ thuộc
 npm install
 
-# 3. Tạo cấu hình môi trường từ mẫu
-cp .env.example .env
-# Chỉnh sửa khóa bí mật JWT_SECRET và ENCRYPTION_KEY trong tệp .env
+# Cài đặt phụ thuộc cho Client
+cd ../QLCS-Client
+npm install
+```
 
-# 4. Khởi tạo cơ sở dữ liệu Prisma
-npx prisma db push
+### 2. Cấu hình môi trường
 
-# 5. Nạp tài khoản quản trị mặc định (Admin Xã)
-npx tsx scripts/seed-admin.ts
+Tạo tệp `.env` tại thư mục `QLCS-Backend/` từ mẫu `.env.example`:
 
-# 6. Khởi chạy dịch vụ backend ở chế độ phát triển (Cổng 5000)
+| Tên biến | Ý nghĩa | Bắt buộc |
+| :--- | :--- | :---: |
+| `PORT` | Cổng dịch vụ Backend (mặc định: `5000`) | Không |
+| `NODE_ENV` | Môi trường chạy (`development` / `production`) | Không |
+| `DATABASE_URL` | Chuỗi kết nối PostgreSQL (Session / Pooler) | Có |
+| `DIRECT_URL` | Chuỗi kết nối trực tiếp PostgreSQL (dùng cho migrate) | Có |
+| `JWT_SECRET` | Khóa bí mật ký Access Token | Có |
+| `JWT_REFRESH_SECRET` | Khóa bí mật ký Refresh Token | Có |
+| `ENCRYPTION_KEY` | Khóa 256-bit (64 ký tự hex) mã hóa CCCD qua AES-256-GCM | Có |
+| `BACKUP_ENCRYPTION_KEY` | Khóa mã hóa tệp sao lưu dữ liệu | Không |
+| `CORS_ORIGIN` | Nguồn gốc cho phép kết nối API (ví dụ: `http://localhost:5173`) | Có |
+
+Tạo tệp `.env.local` tại thư mục `QLCS-Client/` từ mẫu `.env.example`:
+
+| Tên biến | Ý nghĩa | Bắt buộc |
+| :--- | :--- | :---: |
+| `VITE_API_URL` | Địa chỉ gốc API Backend (mặc định: `http://localhost:5000/api`) | Có |
+
+### 3. Chạy phát triển
+
+```bash
+# Khởi chạy Backend (Cổng 5000)
+cd QLCS-Backend
+npm run prisma:push
+npm run dev
+
+# Khởi chạy Client Web (Cổng 5173, mở terminal mới)
+cd QLCS-Client
 npm run dev
 ```
 
-### 4.3. Khởi chạy Ứng dụng Giao diện (`QLCS-Client`)
-
-Mở một cửa sổ dòng lệnh mới:
+### 4. Chạy kiểm thử
 
 ```bash
-# 1. Di chuyển vào thư mục client
+# Kiểm thử Client (107 bài test)
 cd QLCS-Client
+npm test
 
-# 2. Cài đặt các gói phụ thuộc
-npm install
-
-# 3. Khởi chạy giao diện phát triển (Cổng 5173)
-npm run dev
-```
-
-Sau khi khởi chạy, truy cập trình duyệt tại địa chỉ: `http://localhost:5173/`
-
-### 4.4. Chạy kiểm thử tự động (Unit Tests)
-
-```bash
-cd QLCS-Client
+# Kiểm thử Backend (13 bài test)
+cd QLCS-Backend
 npm test
 ```
 
+### 5. Đóng gói ứng dụng
+
+```bash
+# Đóng gói bản Web
+cd QLCS-Client
+npm run build:vite
+
+# Đóng gói bản Desktop Windows (bản cài đặt .exe)
+npm run build:win
+```
+
 ---
 
-## 5. Chính Sách An Toàn Thông Tin
+## Cấu trúc thư mục
 
-Dự án tuân thủ nghiêm ngặt các quy định về an toàn bảo mật và bảo vệ dữ liệu cá nhân theo **Nghị định 13/2023/NĐ-CP**:
-- Mọi dữ liệu định danh (số CCCD) được mã hóa tại mức lưu trữ bằng `AES-256-GCM`.
-- Dữ liệu hiển thị mặc định che mờ `••••••••1234`.
-- Xem chi tiết chính sách tiếp nhận và xử lý sự cố an ninh tại tệp [SECURITY.md](SECURITY.md).
+```
+QLCS/
+├── QLCS-Backend/            # Dịch vụ máy chủ Express, Prisma ORM và API
+│   ├── prisma/              # Lược đồ CSDL và tệp di chuyển Prisma
+│   ├── scripts/             # Kịch bản nạp dữ liệu và bảo trì CSDL
+│   └── src/                 # Bộ điều khiển, định tuyến, middleware và tiện ích mã hóa
+├── QLCS-Client/             # Ứng dụng giao diện người dùng React và Electron
+│   ├── electron/            # Mã nguồn tiến trình chính và preload của Electron
+│   └── src/                 # Giao diện, components, hooks, web workers và API client
+├── docs/                    # Tài liệu kiểm thử, kiến trúc và ảnh chụp màn hình
+├── tests/                   # Kịch bản kiểm thử tích hợp đầu cuối
+├── README.md                # Tài liệu tổng quan dự án
+└── SECURITY.md              # Chính sách an toàn thông tin và báo cáo lỗ hổng
+```
 
 ---
 
-## 6. Liên Hệ & Quản Trị Hệ Thống
+## Bảo mật
 
-- **Bộ phận phụ trách:** Ban Chuyển đổi số & Công nghệ Thông tin — UBND Xã Đăk Hà
-- **Quản trị viên kho mã nguồn:** [Umnuar (GitHub)](https://github.com/Umnuar)
-- **Báo cáo an ninh thông tin:** Vui lòng thực hiện theo hướng dẫn trong [SECURITY.md](SECURITY.md).
+Hệ thống mã hóa số CCCD bằng thuật toán AES-256-GCM, hiển thị dạng che mờ `••••••••1234` trên giao diện và phân quyền truy cập nghiêm ngặt theo thôn. Mọi thao tác nhạy cảm đều được ghi nhận vào nhật ký kiểm toán. Xem chi tiết quy trình báo cáo lỗ hổng tại [SECURITY.md](SECURITY.md).
+
+---
+
+## Trạng thái và giới hạn đã biết
+
+- **Trạng thái**: Hệ thống đang vận hành trong môi trường mạng nội bộ thử nghiệm tại xã Đăk Hà.
+- **Giới hạn đã biết**:
+  - Tính năng nhập Excel phụ thuộc cấu trúc cột biểu mẫu; cần ánh xạ cột khi định dạng nguồn thay đổi.
+  - Ứng dụng Desktop hiện tối ưu cho hệ điều hành Windows; bản macOS và Linux chưa được đóng gói chính thức.
+- **Hướng phát triển**: Tiếp tục tối ưu hóa hiệu năng đồng bộ dữ liệu ngoại tuyến và mở rộng kết nối liên thông với QLHK và QLNN.
+
+---
+
+## Người duy trì và liên hệ
+
+- **Đơn vị quản lý**: Ban Chỉ đạo Chuyển đổi số UBND Xã Đăk Hà.
+- **Tác giả phát triển**: [Umnuar (GitHub)](https://github.com/Umnuar).
+- **Liên hệ kỹ thuật & an ninh**: Vui lòng xem hướng dẫn tại [SECURITY.md](SECURITY.md).
+
+---
+
+## Giấy phép
+
+Toàn bộ quyền sở hữu trí tuệ và bản quyền phần mềm thuộc về **Ủy ban Nhân dân Xã Đăk Hà và Tác giả (Umnuar)**. Mọi quyền được bảo lưu (All Rights Reserved). Dự án không áp dụng giấy phép mã nguồn mở tự do. Nghiêm cấm mọi hành vi sao chép, trích xuất, phân phối lại hoặc thương mại hóa khi chưa có văn bản đồng ý chính thức từ đơn vị quản lý và tác giả.
