@@ -594,6 +594,7 @@ export default function Dashboard({ isGlobal, tabOverride }: DashboardProps) {
 				villages={villages}
 				selectedIds={filters.selectedIds}
 				activeTab={activeTab}
+				villageName={selectedVillageName}
 				filters={{
 					search: filters.debouncedSearch,
 					statusFilter: filters.statusFilter,
