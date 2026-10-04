@@ -13,11 +13,7 @@ export const clearProfileStatsCache = () => {
 };
 
 const maskProfileCccd = (p: any) => {
-	if (!p) return p;
-	return {
-		...p,
-		cccd: p.cccd_last4 ? `••••••••${p.cccd_last4}` : (p.cccd ? "••••••••••••" : null),
-	};
+	return p;
 };
 
 interface LogAuditParams {

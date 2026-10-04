@@ -12,11 +12,7 @@ export const clearHtxhStatsCache = () => {
 };
 
 const maskHtxhProfileCccd = (p: any) => {
-	if (!p) return p;
-	return {
-		...p,
-		cccd: p.cccd_last4 ? `••••••••${p.cccd_last4}` : (p.cccd ? "••••••••••••" : null),
-	};
+	return p;
 };
 
 const HTXH_CATEGORY_MAP: Record<string, string> = {

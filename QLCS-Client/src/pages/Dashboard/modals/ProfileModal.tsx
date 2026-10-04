@@ -513,20 +513,16 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
 										value={formData.cccd || ""}
 										maxLength={12}
 										onChange={(e) =>
-											setFormData({ ...formData, cccd: e.target.value })
+											setFormData({ ...formData, cccd: e.target.value.replace(/\D/g, "") })
 										}
 										placeholder="0600..."
 										className={`${inputClasses} font-mono`}
 									/>
-									{formErrors.cccd ? (
+									{formErrors.cccd && (
 										<p className="mt-1 text-xs text-rose-500 font-semibold">
 											{formErrors.cccd}
 										</p>
-									) : isMaskedCccd(formData.cccd) ? (
-										<p className="mt-1 text-[11px] text-slate-400 dark:text-slate-500">
-											Số CCCD đang che bảo mật. Nhập 12 số mới nếu muốn thay đổi.
-										</p>
-									) : null}
+									)}
 								</div>
 
 								{/* Dân tộc */}

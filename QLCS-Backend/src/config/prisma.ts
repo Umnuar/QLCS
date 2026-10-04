@@ -129,20 +129,10 @@ export const prisma = basePrisma.$extends({
 			}
 
 			return query(args).then((result: any) => {
-				// Decrypt on output: Chỉ giải mã khi thao tác là findUnique hoặc findFirst (xem chi tiết 1 bản ghi)
-				// Đối với findMany (danh sách), KHÔNG tự động giải mã trường cccd để bảo vệ dữ liệu PII
-				if (
-					operation === "findUnique" ||
-					operation === "findFirst" ||
-					operation === "findUniqueOrThrow" ||
-					operation === "findFirstOrThrow"
-				) {
-					if (Array.isArray(result)) {
-						return result.map((r: any) => processOutputData(r));
-					}
-					return processOutputData(result);
+				if (Array.isArray(result)) {
+					return result.map((r: any) => processOutputData(r));
 				}
-				return result;
+				return processOutputData(result);
 			});
 		},
 	},
