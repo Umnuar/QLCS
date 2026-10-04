@@ -30,9 +30,8 @@ Thumbs.db
 Desktop.ini
 
 # Environment
-.env
-.env.local
-.env.*.local
+.env*
+!.env.example
 
 # Dev logs
 dev_log.txt

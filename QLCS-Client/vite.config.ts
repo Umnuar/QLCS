@@ -13,6 +13,15 @@ export default defineConfig({
       "xlsx": "xlsx-js-style",
     },
   },
+  server: {
+    port: 5173,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:5000',
+        changeOrigin: true,
+      },
+    },
+  },
   plugins: [
     nodePolyfills({
       include: ['stream', 'buffer', 'util', 'events', 'process'],

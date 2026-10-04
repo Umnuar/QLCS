@@ -28,6 +28,7 @@ const isOriginAllowed = (origin: string | undefined): boolean => {
 	if (!origin) return true; // Hỗ trợ Electron Desktop (file://), mobile, cURL
 	if (
 		origin === "https://qlcs.dulieudakha.vn" ||
+		origin.endsWith(".dulieudakha.vn") ||
 		origin === "https://dulieudakha.vn" ||
 		origin === "http://localhost:5173" ||
 		origin === "http://127.0.0.1:5173"
@@ -176,5 +177,9 @@ httpServer.listen(PORT, () => {
 		startDashboard();
 	}
 });
+
+// Giữ kết nối Cloudflare Tunnel luôn ấm (Keep-Alive)
+httpServer.keepAliveTimeout = 65000;
+httpServer.headersTimeout = 66000;
 
 export { io };
