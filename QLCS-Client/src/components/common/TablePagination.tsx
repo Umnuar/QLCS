@@ -34,7 +34,7 @@ export const TablePagination: React.FC<TablePaginationProps> = ({
 	const endIdx = Math.min(page * limit, total);
 
 	return (
-		<div className="p-3.5 bg-slate-50/90 dark:bg-slate-950/80 border-t border-slate-200/80 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs select-none">
+		<div className="p-3.5 bg-slate-50/90 dark:bg-slate-950/80 border-t border-slate-200/80 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs select-none relative z-20">
 			<div className="text-slate-600 dark:text-slate-300 font-medium">
 				Hiển thị{" "}
 				<strong className="text-slate-900 dark:text-white font-bold tabular-nums">
@@ -59,6 +59,7 @@ export const TablePagination: React.FC<TablePaginationProps> = ({
 						options={LIMIT_OPTIONS}
 						size="sm"
 						variant="form"
+						placement="top"
 						containerClassName="w-28"
 						className="font-bold"
 					/>

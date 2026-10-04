@@ -29,6 +29,7 @@ export interface CustomSelectProps<T = string | number> {
 	className?: string;
 	containerClassName?: string;
 	dropdownClassName?: string;
+	placement?: "top" | "bottom" | "auto";
 	id?: string;
 	name?: string;
 }
@@ -53,6 +54,7 @@ export function CustomSelect<T extends string | number = string | number>({
 	className = "",
 	containerClassName = "",
 	dropdownClassName = "",
+	placement = "auto",
 	id,
 	name,
 }: CustomSelectProps<T>) {
@@ -116,14 +118,38 @@ export function CustomSelect<T extends string | number = string | number>({
 		}
 	}, [isOpen, filteredOptions, value]);
 
-	// Tự động lật hướng nếu cách đáy màn hình < 240px
+	// Tự động lật hướng nếu cách đáy màn hình hoặc đáy container cuộn/clip < 220px
 	useEffect(() => {
 		if (isOpen && containerRef.current) {
+			if (placement === "top") {
+				setOpenUpward(true);
+				return;
+			}
+			if (placement === "bottom") {
+				setOpenUpward(false);
+				return;
+			}
+
 			const rect = containerRef.current.getBoundingClientRect();
-			const spaceBelow = window.innerHeight - rect.bottom;
-			setOpenUpward(spaceBelow < 240);
+			let clippingBottom = window.innerHeight;
+			let parent = containerRef.current.parentElement;
+			while (parent && parent !== document.body) {
+				const style = window.getComputedStyle(parent);
+				if (
+					style.overflow !== "visible" ||
+					style.overflowX !== "visible" ||
+					style.overflowY !== "visible"
+				) {
+					const pRect = parent.getBoundingClientRect();
+					clippingBottom = Math.min(clippingBottom, pRect.bottom);
+				}
+				parent = parent.parentElement;
+			}
+
+			const spaceBelow = clippingBottom - rect.bottom;
+			setOpenUpward(spaceBelow < 220);
 		}
-	}, [isOpen]);
+	}, [isOpen, placement]);
 
 	useEffect(() => {
 		if (isOpen && shouldShowSearch) {
