@@ -1,0 +1,197 @@
+generator client {
+  provider        = "prisma-client-js"
+  engineType      = "library"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  directUrl  = env("DIRECT_URL")
+  extensions = [pg_trgm, uuid_ossp(map: "uuid-ossp")]
+}
+
+model users {
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  username      String    @unique @db.VarChar(30)
+  password_hash String
+  role          String    @default("user") @db.VarChar(10)
+  avatar_url    String?
+  village_id    String?   @db.Uuid
+  created_at    DateTime? @default(now()) @db.Timestamptz
+  updated_at    DateTime? @default(now()) @db.Timestamptz
+
+  refresh_tokens    refresh_tokens[]
+  audit_logs        audit_logs[]
+  profile_audit_log profile_audit_log[]
+
+  village villages? @relation(fields: [village_id], references: [id])
+}
+
+model refresh_tokens {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id    String    @db.Uuid
+  token      String    @unique
+  expires_at DateTime  @db.Timestamptz
+  created_at DateTime? @default(now()) @db.Timestamptz
+
+  user users @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id], map: "idx_rt_user_id")
+}
+
+model villages {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name       String    @db.VarChar(255)
+  created_at DateTime? @default(now()) @db.Timestamptz
+
+  profiles      profiles[]
+  htxh_profiles htxh_profiles[]
+  users         users[]
+}
+
+model profiles {
+  id              String  @id @db.Uuid
+  stt             Int?
+  name            String  @db.VarChar(255)
+  name_unaccented String? @db.VarChar(255)
+  dob             String? @db.VarChar(20)
+  gender          String? @db.VarChar(10)
+  cccd            String?
+  cccd_hash       String? @db.VarChar(64)
+  cccd_last4      String? @db.VarChar(4)
+  ethnicity       String? @db.VarChar(50)
+  residence       String?
+  current_address String?
+  village_id      String? @db.Uuid
+
+  age60        String? @default("") @db.VarChar(5)
+  age65        String? @default("") @db.VarChar(5)
+  age70        String? @default("") @db.VarChar(5)
+  age75        String? @default("") @db.VarChar(5)
+  age80        String? @default("") @db.VarChar(5)
+  age85        String? @default("") @db.VarChar(5)
+  age90        String? @default("") @db.VarChar(5)
+  age95        String? @default("") @db.VarChar(5)
+  age100       String? @default("") @db.VarChar(5)
+  age_over_100 String? @default("") @db.VarChar(5)
+
+  received         Boolean? @default(false)
+  calculation_year Int?
+  notes            String?  @default("")
+
+  is_deleted Boolean?  @default(false)
+  deleted_at DateTime? @db.Timestamptz
+  created_at DateTime? @default(now()) @db.Timestamptz
+  updated_at DateTime? @default(now()) @db.Timestamptz
+  version    Int?      @default(1)
+
+  village villages? @relation(fields: [village_id], references: [id])
+
+  @@index([name], map: "idx_profiles_name")
+  @@index([village_id], map: "idx_profiles_village_id")
+  @@index([received], map: "idx_profiles_received")
+  @@index([is_deleted], map: "idx_profiles_is_deleted")
+  @@index([cccd_last4], map: "idx_profiles_cccd_last4")
+  @@index([cccd_hash], map: "idx_profiles_cccd_hash")
+  @@index([name_unaccented(ops: raw("gin_trgm_ops"))], type: Gin, map: "idx_profiles_name_unaccented_gin")
+  @@index([village_id, is_deleted, calculation_year])
+}
+
+model htxh_profiles {
+  id              String  @id @db.Uuid
+  village_id      String  @db.Uuid
+  stt             Int?
+  name            String  @db.VarChar(255)
+  name_unaccented String? @db.VarChar(255)
+  dob             String? @db.VarChar(20)
+  gender          String? @db.VarChar(10)
+  cccd            String?
+  cccd_hash       String? @db.VarChar(64)
+  cccd_last4      String? @db.VarChar(4)
+  ethnicity       String? @db.VarChar(50)
+  residence       String?
+  current_address String?
+
+  age75plus         String? @default("") @db.VarChar(5)
+  age70to74poor     String? @default("") @db.VarChar(5)
+  bao_tro           String? @default("") @db.VarChar(5)
+  huu_tri           String? @default("") @db.VarChar(5)
+  huu_tuat_bao_hiem String? @default("") @db.VarChar(5)
+  nguoi_co_cong     String? @default("") @db.VarChar(5)
+
+  received         Boolean? @default(false)
+  notes            String?  @default("")
+  calculation_year Int?
+
+  is_deleted Boolean?  @default(false)
+  deleted_at DateTime? @db.Timestamptz
+  created_at DateTime? @default(now()) @db.Timestamptz
+  updated_at DateTime? @default(now()) @db.Timestamptz
+  version    Int?      @default(1)
+
+  village villages @relation(fields: [village_id], references: [id])
+
+  @@index([name], map: "idx_htxh_name")
+  @@index([village_id], map: "idx_htxh_village_id")
+  @@index([received], map: "idx_htxh_received")
+  @@index([is_deleted])
+  @@index([cccd_last4], map: "idx_htxh_cccd_last4")
+  @@index([cccd_hash], map: "idx_htxh_cccd_hash")
+  @@index([name_unaccented(ops: raw("gin_trgm_ops"))], type: Gin, map: "idx_htxh_name_unaccented_gin")
+  @@index([village_id, is_deleted, calculation_year])
+}
+
+model audit_logs {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id    String?   @db.Uuid
+  village_id String?   @db.Uuid
+  action     String
+  details    String?
+  ip_address String?   @db.VarChar(45)
+  created_at DateTime? @default(now()) @db.Timestamptz
+
+  user users? @relation(fields: [user_id], references: [id])
+}
+
+model profile_audit_log {
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  profile_id     String    @db.Uuid
+  user_id        String?   @db.Uuid
+  village_id     String?   @db.Uuid
+  action         String    @db.VarChar(20)
+  changed_fields Json?
+  old_values     Json?
+  new_values     Json?
+  note           String?
+  profile_type   String?   @default("chuctho") @db.VarChar(20)
+  sync_source    String?   @default("online") @db.VarChar(20)
+  created_at     DateTime? @default(now()) @db.Timestamptz
+
+  user users? @relation(fields: [user_id], references: [id])
+
+  @@index([profile_id], map: "idx_pal_profile_id")
+  @@index([village_id], map: "idx_pal_village_id")
+  @@index([created_at])
+}
+
+model settings {
+  key   String @id @db.VarChar(100)
+  value String
+}
+
+/// [SCHEMA DRIFT / ARCHITECTURAL NOTE]:
+/// Model `stats_cache` được giữ lại trong schema để tương thích ngược với cấu trúc CSDL hiện hữu.
+/// Hệ thống thực tế hiện tại sử dụng cơ chế In-Memory Cache (TTL 10s trong profiles.controller.ts & htxh.controller.ts)
+/// nhằm giảm tải truy vấn và ngăn chặn nghẽn Connection Pool trên Supabase.
+/// Giữ nguyên model này để tránh breaking changes trên CSDL và phục vụ tương thích ngược.
+model stats_cache {
+  id           String    @id @db.VarChar(50)
+  profile_type String    @db.VarChar(20)
+  village_id   String?   @db.Uuid
+  stat_key     String    @db.VarChar(50)
+  stat_value   Int       @default(0)
+  updated_at   DateTime? @default(now()) @db.Timestamptz
+
+  @@index([profile_type, village_id], map: "idx_stats_type_village")
+}

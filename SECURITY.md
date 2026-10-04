@@ -82,3 +82,12 @@ Khi phát hiện sự cố an ninh (truy cập trái phép, tấn công từ ch�
 5. **Bước 5: Báo cáo & Lưu trữ hồ sơ (Post-Incident)**:
    - Lập biên bản sự cố gửi Lãnh đạo UBND xã và các cơ quan chuyên môn theo quy định.
    - Cập nhật quy trình kiểm toán để ngăn chặn sự cố tương tự tái diễn.
+
+---
+
+## 6. BẢN QUYỀN & GIẤY PHÉP (COPYRIGHT & PROPRIETARY NOTICE)
+
+- Hệ thống QLCS là giải pháp phần mềm chuyên dụng của UBND Xã Đăk Hà.
+- **Dự án KHÔNG áp dụng giấy phép mã nguồn mở MIT hay bất kỳ giấy phép mở tự do nào khác.**
+- Toàn bộ bản quyền thuộc về UBND Xã Đăk Hà và Tác giả (Umnuar). Toàn bộ quyền được bảo lưu (**All Rights Reserved**).
+

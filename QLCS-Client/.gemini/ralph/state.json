@@ -1,0 +1,8 @@
+{
+  "active": true,
+  "current_iteration": 1,
+  "max_iterations": 5,
+  "completion_promise": "",
+  "original_prompt": "find bugs and fix that , or optimize but dont change anything",
+  "started_at": "2026-05-22T15:22:03Z"
+}

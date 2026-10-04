@@ -58,3 +58,8 @@ graphify-out/
 
 # graft's local graph cache — regenerable, not committed (run `graft build`).
 /graft/
+
+# Subrepo git backups
+**/.git_backup/
+**/.git_bak/
+
