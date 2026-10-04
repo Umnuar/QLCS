@@ -222,4 +222,4 @@ Hệ thống mã hóa số CCCD bằng thuật toán AES-256-GCM, hiển thị d
 
 ## Giấy phép
 
-Toàn bộ quyền sở hữu trí tuệ và bản quyền phần mềm thuộc về **Ủy ban Nhân dân Xã Đăk Hà và Tác giả (Umnuar)**. Mọi quyền được bảo lưu (All Rights Reserved). Dự án không áp dụng giấy phép mã nguồn mở tự do. Nghiêm cấm mọi hành vi sao chép, trích xuất, phân phối lại hoặc thương mại hóa khi chưa có văn bản đồng ý chính thức từ đơn vị quản lý và tác giả.
+Toàn bộ mã nguồn, cấu trúc dữ liệu và tài liệu kỹ thuật của dự án này thuộc quyền sở hữu trí tuệ của **Ủy ban nhân dân Xã Đăk Hà, Huyện Đăk Hà, Tỉnh Kon Tum**. Mọi quyền được bảo lưu (All Rights Reserved). Dự án không áp dụng giấy phép mã nguồn mở (không áp dụng MIT License, Apache hoặc GPL). Nghiêm cấm sao chép, chỉnh sửa, phân phối lại hoặc sử dụng vào mục đích thương mại khi chưa có văn bản chấp thuận chính thức từ cơ quan chủ quản.
