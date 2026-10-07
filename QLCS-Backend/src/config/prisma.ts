@@ -48,7 +48,12 @@ function decrypt(encryptedText: string): string {
 }
 
 function hashCccd(cccd: string): string {
-	return crypto.createHash("sha256").update(cccd.trim()).digest("hex");
+	const pepper =
+		process.env.CCCD_HASH_PEPPER || process.env.ENCRYPTION_KEY || "";
+	return crypto
+		.createHmac("sha256", pepper)
+		.update(cccd.trim())
+		.digest("hex");
 }
 
 // ============================================================

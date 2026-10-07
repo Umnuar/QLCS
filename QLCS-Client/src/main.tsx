@@ -23,6 +23,3 @@ if (!rootEl) {
 	);
 }
 
-window.api?.on("main-process-message", (message) => {
-	console.log(message);
-});

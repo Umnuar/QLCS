@@ -181,13 +181,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
 	});
 
 	useEffect(() => {
-		const electronApi = (window as any).electronAPI || (window as any).api?.app;
-		if (electronApi?.setZoom) {
-			electronApi.setZoom(zoomLevel);
-		} else {
-			// Fallback CSS zoom on body
-			(document.body.style as any).zoom = `${zoomLevel}%`;
-		}
+		// Native CSS zoom on document body
+		(document.body.style as any).zoom = `${zoomLevel}%`;
 		try {
 			localStorage.setItem("qlcs_zoom", String(zoomLevel));
 		} catch {
@@ -349,28 +344,38 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
 	// Auth Initialization & Auto Session Check
 	useEffect(() => {
 		const checkSession = async () => {
-			const token = await secureStorage.getItem("accessToken");
-			if (token) {
-				try {
-					const userData = await authApi.getMe();
-					setUser(userData);
-					if (userData.role === "admin") {
-						setActiveTab("villages");
-						setSelectedVillageIdState("");
-					} else {
-						setActiveTab("analytics");
-						if (userData.village_id) {
-							setSelectedVillageIdState(userData.village_id);
+			try {
+				const token = await secureStorage.getItem("accessToken");
+				if (token) {
+					try {
+						const userData = await Promise.race([
+							authApi.getMe(),
+							new Promise((_, reject) =>
+								setTimeout(() => reject(new Error("Timeout")), 3000),
+							),
+						]);
+						setUser(userData as any);
+						if ((userData as any).role === "admin") {
+							setActiveTab("villages");
+							setSelectedVillageIdState("");
+						} else {
+							setActiveTab("analytics");
+							if ((userData as any).village_id) {
+								setSelectedVillageIdState((userData as any).village_id);
+							}
 						}
+					} catch {
+						await secureStorage.removeItem("accessToken");
+						await secureStorage.removeItem("refreshToken");
+						setUser(null);
 					}
-				} catch {
-					await secureStorage.removeItem("accessToken");
-					await secureStorage.removeItem("refreshToken");
-					setUser(null);
 				}
+			} catch (err) {
+				console.warn("[AppContext] checkSession error:", err);
+			} finally {
+				setIsInitializing(false);
+				refreshSyncCount();
 			}
-			setIsInitializing(false);
-			refreshSyncCount();
 		};
 
 		checkSession();

@@ -2,8 +2,6 @@ import "dotenv/config";
 import cors from "cors";
 import express from "express";
 import helmet from "helmet";
-import { createServer } from "http";
-import { Server as SocketServer } from "socket.io";
 import { initBackupCron } from "./controllers/backup.controller";
 import { requestLogger } from "./middlewares/logger.middleware";
 import analyticsRoutes from "./routes/analytics.routes";
@@ -16,12 +14,11 @@ import profilesRoutes from "./routes/profiles.routes";
 import settingsRoutes from "./routes/settings.routes";
 import usersRoutes from "./routes/users.routes";
 import villagesRoutes from "./routes/villages.routes";
+import { prisma } from "./config/prisma";
 import { startDashboard } from "./utils/dashboard";
-import { type TokenPayload, verifyAccessToken } from "./utils/jwt";
 
 const app = express();
 app.set("trust proxy", 1);
-const httpServer = createServer(app);
 
 // SEC-04-02: Khóa cứng CORS Whitelist - chỉ cho phép đúng cổng dev máy khách và domain chính thức HTTPS
 const isOriginAllowed = (origin: string | undefined): boolean => {
@@ -37,21 +34,6 @@ const isOriginAllowed = (origin: string | undefined): boolean => {
 	}
 	return false;
 };
-
-// Socket.io
-const io = new SocketServer(httpServer, {
-	cors: {
-		origin: (origin, callback) => {
-			if (isOriginAllowed(origin)) {
-				callback(null, true);
-			} else {
-				callback(new Error("Blocked by Socket.io CORS"));
-			}
-		},
-		methods: ["GET", "POST"],
-		credentials: true,
-	},
-});
 
 // SEC-04-06: Helmet CSP phòng vệ chuyên dụng cho REST API Server
 app.use(
@@ -85,15 +67,20 @@ app.use(express.json({ limit: "2mb" }));
 app.use(express.urlencoded({ extended: true, limit: "2mb" }));
 app.use(requestLogger);
 
-// Make io accessible in controllers
-app.set("io", io);
-
-// Health check theo chuẩn Đắk Hà v2.0.0 (SEC-04-04: Cung cấp thời gian chuẩn máy chủ)
-app.get("/api/health", (_req, res) => {
+// Health check theo chuẩn Đắk Hà v2.0.0 (SEC-04-04: Cung cấp thời gian chuẩn máy chủ & trạng thái CSDL)
+app.head("/api/health", (_req, res) => res.status(200).end());
+app.get("/api/health", async (_req, res) => {
+	let dbStatus = "connected";
+	try {
+		await (prisma as any).$queryRawUnsafe("SELECT 1");
+	} catch {
+		dbStatus = "disconnected";
+	}
 	res.json({
-		status: "ok",
+		status: dbStatus === "connected" ? "ok" : "degraded",
 		app: "qlcs-backend",
 		version: "2.0.0",
+		database: dbStatus,
 		serverTime: new Date().toISOString(),
 		timestamp: Date.now(),
 		uptime: process.uptime(),
@@ -111,43 +98,6 @@ app.use("/api/excel", excelRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/audit-logs", auditRoutes);
 app.use("/api/backups", backupRoutes);
-
-// SEC-03-11: Xác thực JWT Handshake và phân quyền Room Socket.io
-io.use((socket, next) => {
-	const token = socket.handshake.auth?.token || socket.handshake.query?.token;
-	if (!token || typeof token !== "string") {
-		return next(new Error("Authentication error: Token required"));
-	}
-	try {
-		const payload = verifyAccessToken(token);
-		(socket as any).user = payload;
-		next();
-	} catch (err) {
-		return next(new Error("Authentication error: Invalid or expired token"));
-	}
-});
-
-io.on("connection", (socket) => {
-	const user = (socket as any).user as TokenPayload;
-	console.log(`[Socket.io] Authenticated user connected: ${user?.username} (${socket.id})`);
-
-	socket.on("join-village", (villageId: string) => {
-		if (!villageId || typeof villageId !== "string") return;
-
-		// Phân quyền Room: Admin được join mọi thôn; cán bộ thôn chỉ được join đúng thôn mình phụ trách
-		if (user.role !== "admin" && user.village_id && user.village_id !== villageId) {
-			console.warn(`[Socket.io] Unauthorized room join attempt by ${user.username} to village ${villageId}`);
-			socket.emit("error", { message: "Không có quyền truy cập thôn khác" });
-			return;
-		}
-
-		socket.join(`village:${villageId}`);
-	});
-
-	socket.on("disconnect", () => {
-		console.log(`[Socket.io] Client disconnected: ${socket.id}`);
-	});
-});
 
 // Global error handler (hide stack traces in production)
 app.use(
@@ -169,7 +119,7 @@ initBackupCron();
 
 // Start server
 const PORT = process.env.PORT || 5000;
-httpServer.listen(PORT, () => {
+const server = app.listen(PORT, () => {
 	console.log(`[Server] QLCS Backend v2.0.0 running on port ${PORT}`);
 	console.log(`[Server] Environment: ${process.env.NODE_ENV || "development"}`);
 
@@ -179,7 +129,7 @@ httpServer.listen(PORT, () => {
 });
 
 // Giữ kết nối Cloudflare Tunnel luôn ấm (Keep-Alive)
-httpServer.keepAliveTimeout = 65000;
-httpServer.headersTimeout = 66000;
+server.keepAliveTimeout = 65000;
+server.headersTimeout = 66000;
 
-export { io };
+export default app;

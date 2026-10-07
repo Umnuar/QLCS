@@ -10,7 +10,7 @@ beforeAll(async () => {
 		postMessage: mockPostMessage,
 		onmessage: null,
 	};
-	global.self = selfMock1 as any;
+	(globalThis as any).self = selfMock1 as any;
 	await import("../workers/importChucthoWorker");
 	chucthoHandler = selfMock1.onmessage;
 
@@ -22,7 +22,7 @@ beforeAll(async () => {
 		postMessage: mockPostMessage,
 		onmessage: null,
 	};
-	global.self = selfMock2 as any;
+	(globalThis as any).self = selfMock2 as any;
 	await import("../workers/importHtxhWorker");
 	htxhHandler = selfMock2.onmessage;
 });

@@ -11,7 +11,7 @@ export const AppLayout: React.FC<{ children: React.ReactNode }> = ({
 	const { isOnline, isBackendHealthy, checkServerHealth } = useApp();
 	const [isRetrying, setIsRetrying] = useState(false);
 	const [isReconnected, setIsReconnected] = useState(false);
-	const timerRef = useRef<NodeJS.Timeout | null>(null);
+	const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
 	const isDisconnected = !isOnline || !isBackendHealthy;
 
