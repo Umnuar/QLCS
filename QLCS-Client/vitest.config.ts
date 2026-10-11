@@ -5,5 +5,6 @@ export default defineConfig({
     globals: true,
     environment: 'node',
     fileParallelism: false,
+    exclude: ['**/node_modules/**', '**/e2e/**', '**/tests/e2e/**', '**/dist/**'],
   },
 })

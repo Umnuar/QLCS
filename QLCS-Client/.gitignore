@@ -45,3 +45,13 @@ dev_log2.txt
 GRAPH_REPORT.md
 .codegraph/
 *.codegraph.db
+
+# graft's local graph cache — regenerable, not committed (run `graft build`).
+/graft/
+
+# Playwright artifacts
+test-results/
+playwright-report/
+
+# graft's local repository settings — not committed.
+/.graft/

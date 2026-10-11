@@ -2,6 +2,7 @@ import type { Response } from "express";
 import cron from "node-cron";
 import { prisma } from "../config/prisma";
 import type { AuthRequest } from "../middlewares/auth.middleware";
+import { logCron } from "../middlewares/logger.middleware";
 
 /**
  * GET /api/backups/snapshot
@@ -219,7 +220,7 @@ export const initBackupCron = () => {
 				villages: villagesCount,
 			};
 
-			console.log(`[Backup Cron 02:00 AM] Health Check:`, logDetails);
+			logCron("DailyBackup", "SUCCESS");
 
 			await (prisma as any).audit_logs.create({
 				data: {
@@ -229,14 +230,10 @@ export const initBackupCron = () => {
 				},
 			});
 		} catch (err) {
-			console.error(
-				"[Backup Cron] Lỗi khi thực hiện kiểm tra sao lưu hàng ngày:",
-				err,
-			);
+			const errorMsg = err instanceof Error ? err.message : String(err);
+			logCron("DailyBackup", `FAILED: ${errorMsg}`);
 		}
 	});
 
-	console.log(
-		"[Cron] Đã kích hoạt lịch tự động sao lưu/giám sát CSDL lúc 02:00 AM hàng ngày.",
-	);
+	logCron("DailyBackup", "SCHEDULED (02:00 AM)");
 };

@@ -169,14 +169,63 @@ export const getDeletedHtxhProfiles = async (
 	}
 };
 
+const ALLOWED_HTXH_KEYS = new Set([
+	"stt",
+	"name",
+	"dob",
+	"gender",
+	"cccd",
+	"ethnicity",
+	"residence",
+	"current_address",
+	"village_id",
+	"age75plus",
+	"age70to74poor",
+	"bao_tro",
+	"huu_tri",
+	"huu_tuat_bao_hiem",
+	"nguoi_co_cong",
+	"received",
+	"notes",
+	"calculation_year",
+]);
+
+const cleanHtxhPayload = (raw: any): Record<string, any> => {
+	const cleaned: Record<string, any> = {};
+	const currentAddress =
+		raw.current_address !== undefined
+			? raw.current_address
+			: raw.currentAddress;
+	if (currentAddress !== undefined) {
+		cleaned.current_address = currentAddress || null;
+	}
+	for (const key of Object.keys(raw)) {
+		if (ALLOWED_HTXH_KEYS.has(key)) {
+			let val = raw[key];
+			if (key === "village_id") {
+				val = val && String(val).trim() !== "" ? String(val).trim() : null;
+			}
+			if (key === "stt" || key === "calculation_year") {
+				val = val !== null && val !== undefined && val !== "" ? Number(val) : null;
+			}
+			if (key === "received") {
+				val = Boolean(val);
+			}
+			cleaned[key] = val;
+		}
+	}
+	return cleaned;
+};
+
 export const createHtxhProfile = async (req: AuthRequest, res: Response) => {
 	try {
-		const data = req.body;
-		const profileId = data.id || crypto.randomUUID();
+		const rawData = req.body;
+		const data = cleanHtxhPayload(rawData);
+		const profileId = rawData.id || crypto.randomUUID();
 		const newProfile = await (prisma as any).htxh_profiles.create({
 			data: {
-				...(req.user?.village_id ? { village_id: req.user.village_id } : {}),
 				...data,
+				...(req.user?.village_id ? { village_id: req.user.village_id } : {}),
 				id: profileId,
 				name_unaccented: removeAccents(data.name || ""),
 				is_deleted: false,
@@ -208,7 +257,8 @@ export const createHtxhProfile = async (req: AuthRequest, res: Response) => {
 export const updateHtxhProfile = async (req: AuthRequest, res: Response) => {
 	try {
 		const id = req.params.id as string;
-		const data = req.body;
+		const rawData = req.body;
+		const data = cleanHtxhPayload(rawData);
 		const currentProfile = await (prisma as any).htxh_profiles.findUnique({
 			where: { id },
 		});
@@ -225,8 +275,8 @@ export const updateHtxhProfile = async (req: AuthRequest, res: Response) => {
 		}
 		// Optimistic locking
 		if (
-			data.version !== undefined &&
-			Number(data.version) !== Number(currentProfile.version)
+			rawData.version !== undefined &&
+			Number(rawData.version) !== Number(currentProfile.version)
 		) {
 			res.status(409).json({
 				error: "Hồ sơ đã được sửa bởi người khác",
@@ -238,8 +288,8 @@ export const updateHtxhProfile = async (req: AuthRequest, res: Response) => {
 		const updatedProfile = await (prisma as any).htxh_profiles.update({
 			where: { id },
 			data: {
-				...(req.user?.village_id ? { village_id: req.user.village_id } : {}),
 				...data,
+				...(req.user?.village_id ? { village_id: req.user.village_id } : {}),
 				version: currentProfile.version! + 1,
 				updated_at: new Date(),
 			},

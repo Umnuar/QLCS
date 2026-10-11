@@ -1,5 +1,4 @@
 import {
-	AGE_MILESTONES_CHUCTHO,
 	calcAgeFields,
 	findHeaderAndDataStart,
 	fuzzyMatch,
@@ -20,6 +19,12 @@ const CTH_COL_MAP: Record<string, string> = {
 	"ngày sinh": "dob",
 	"ngay sinh": "dob",
 	"nam sinh": "dob",
+	"giới tính": "gender",
+	"gioi tinh": "gender",
+	"nam / nu": "gender",
+	"nam/nu": "gender",
+	"nam nu": "gender",
+	namnu: "gender",
 	nam: "genderNam",
 	"giới tính nam": "genderNam",
 	nữ: "genderNu",
@@ -189,7 +194,38 @@ self.onmessage = (e) => {
 
 		const genderNam = getCol("genderNam");
 		const genderNu = getCol("genderNu");
-		const hasNoGender = !genderNam && !genderNu;
+		const rawGender = getCol("gender");
+
+		let gender = "";
+		if (genderNam && !genderNu) {
+			gender = "Nam";
+		} else if (genderNu && !genderNam) {
+			gender = "Nữ";
+		} else if (genderNam && genderNu) {
+			gender = "Nam";
+		} else if (rawGender) {
+			const gNorm = rawGender.toLowerCase().trim();
+			if (
+				gNorm === "nam" ||
+				gNorm === "m" ||
+				gNorm === "1" ||
+				gNorm.startsWith("nam")
+			) {
+				gender = "Nam";
+			} else if (
+				gNorm === "nữ" ||
+				gNorm === "nu" ||
+				gNorm === "f" ||
+				gNorm === "0" ||
+				gNorm === "2" ||
+				gNorm.startsWith("nữ") ||
+				gNorm.startsWith("nu")
+			) {
+				gender = "Nữ";
+			}
+		}
+
+		const hasNoGender = !gender && !genderNam && !genderNu;
 
 		if (isDeceasedOrMoved) {
 			errors.push(
@@ -222,7 +258,7 @@ self.onmessage = (e) => {
 			stt: parseInt(getCol("stt"), 10) || 0,
 			name,
 			dob: dobParsed.dob,
-			gender: getCol("genderNam") ? "Nam" : getCol("genderNu") ? "Nữ" : "",
+			gender: gender || (genderNam ? "Nam" : genderNu ? "Nữ" : ""),
 			cccd,
 			ethnicity: getCol("ethnicity"),
 			residence: getCol("residence"),
@@ -241,6 +277,30 @@ self.onmessage = (e) => {
 			notes: getCol("notes"),
 		};
 
+		const milestoneKeys = [
+			"age60",
+			"age65",
+			"age70",
+			"age75",
+			"age80",
+			"age85",
+			"age90",
+			"age95",
+			"age100",
+			"ageOver100",
+		];
+		const explicitMilestones: Record<string, string> = {};
+		let hasExplicitMilestone = false;
+		for (const key of milestoneKeys) {
+			const val = getCol(key).toLowerCase();
+			if (val === "x" || val === "1" || val.includes("đúng") || val === "v") {
+				explicitMilestones[key] = "x";
+				hasExplicitMilestone = true;
+			} else {
+				explicitMilestones[key] = "";
+			}
+		}
+
 		const { fields, ageThisYear, birthdayPassedThisYear } = calcAgeFields(
 			dobParsed.day,
 			dobParsed.month,
@@ -250,17 +310,13 @@ self.onmessage = (e) => {
 			currentDay,
 		);
 
-		// Always use calculated fields to ensure correctness based on current year
-		Object.assign(profileData, fields);
+		if (hasExplicitMilestone) {
+			Object.assign(profileData, explicitMilestones);
+		} else {
+			Object.assign(profileData, fields);
+		}
 		profileData.age = ageThisYear;
 		profileData.birthYear = dobParsed.year;
-
-		if (!AGE_MILESTONES_CHUCTHO.includes(ageThisYear) && ageThisYear <= 100) {
-			errors.push(
-				`Dòng ${rowNum} (${name}): Không thuộc mốc tuổi chúc thọ năm ${currentYear} (${ageThisYear} tuổi), đã bỏ qua.`,
-			);
-			continue;
-		}
 
 		profileData._displayStatus = birthdayPassedThisYear ? "green" : "orange";
 		parsedProfiles.push(profileData);

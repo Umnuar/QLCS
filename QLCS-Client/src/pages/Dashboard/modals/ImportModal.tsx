@@ -401,11 +401,13 @@ export function ImportModal({
 					}
 
 					if (bestMatch) {
-						const cleanedMapping: Record<string, string> = {};
+						const cleanedMapping: Record<string, string> = {
+							...(mappingData.suggestedMapping || {}),
+						};
 						for (const [k, v] of Object.entries(bestMatch.mapping)) {
 							if (typeof v === "string" && mappingData.headers.includes(v)) {
 								cleanedMapping[k] = v;
-							} else {
+							} else if (cleanedMapping[k] === undefined) {
 								cleanedMapping[k] = "";
 							}
 						}
@@ -436,8 +438,9 @@ export function ImportModal({
 			{ key: "stt", label: "Số thứ tự (STT)", required: false },
 			{ key: "name", label: "Họ và tên", required: true },
 			{ key: "dob", label: "Năm sinh / Ngày sinh", required: true },
-			{ key: "genderNam", label: "Giới tính: Nam", required: true },
-			{ key: "genderNu", label: "Giới tính: Nữ", required: true },
+			{ key: "gender", label: "Giới tính (chung 1 cột)", required: false },
+			{ key: "genderNam", label: "Giới tính: Nam", required: false },
+			{ key: "genderNu", label: "Giới tính: Nữ", required: false },
 			{ key: "cccd", label: "Số CCCD / CMND (nếu có)", required: false },
 			{ key: "ethnicity", label: "Dân tộc", required: false },
 			{ key: "residence", label: "Cư trú (nếu có)", required: false },
@@ -496,9 +499,14 @@ export function ImportModal({
 	const isMappingValid = () => {
 		const nameMapped = !!customMapping["name"];
 		const dobMapped = !!customMapping["dob"];
+		const genderMapped = !!customMapping["gender"];
 		const genderNamMapped = !!customMapping["genderNam"];
 		const genderNuMapped = !!customMapping["genderNu"];
-		return nameMapped && dobMapped && (genderNamMapped || genderNuMapped);
+		return (
+			nameMapped &&
+			dobMapped &&
+			(genderMapped || genderNamMapped || genderNuMapped)
+		);
 	};
 
 	const handleSaveErrorLog = () => {
@@ -678,7 +686,7 @@ export function ImportModal({
 	const errorRowsCount = allProfiles.filter((p) => getRowIssueInfo(p).isError).length;
 	const warningRowsCount = allProfiles.filter((p) => getRowIssueInfo(p).isWarning).length;
 	const validRowsCount = allProfiles.filter(
-		(p) => !getRowIssueInfo(p).isError && !getRowIssueInfo(p).isWarning,
+		(p) => !getRowIssueInfo(p).isError,
 	).length;
 
 	const filteredProfiles = filterOnlyIssues
@@ -1239,7 +1247,9 @@ export function ImportModal({
 											const totalFields = fields.length;
 											const mappedCount = fields.filter((f) => !!customMapping[f.key]).length;
 											const isGenderMissing =
-												!customMapping["genderNam"] && !customMapping["genderNu"];
+												!customMapping["gender"] &&
+												!customMapping["genderNam"] &&
+												!customMapping["genderNu"];
 											const neededCount =
 												(!customMapping["name"] ? 1 : 0) +
 												(!customMapping["dob"] ? 1 : 0) +
@@ -1368,11 +1378,17 @@ export function ImportModal({
 											{getFieldsList().map((field) => {
 												const value = customMapping[field.key] || "";
 												const isFieldMapped = !!value;
-												const isRequiredMissing =
-													field.required &&
-													(field.key === "genderNam" || field.key === "genderNu"
-														? !customMapping["genderNam"] && !customMapping["genderNu"]
-														: !value);
+												const isGenderField =
+													field.key === "gender" ||
+													field.key === "genderNam" ||
+													field.key === "genderNu";
+												const hasAnyGender =
+													!!customMapping["gender"] ||
+													!!customMapping["genderNam"] ||
+													!!customMapping["genderNu"];
+												const isRequiredMissing = isGenderField
+													? !hasAnyGender
+													: field.required && !value;
 
 												return (
 													<div
@@ -1391,6 +1407,14 @@ export function ImportModal({
 																{field.label}{" "}
 																{field.required && (
 																	<span className="text-rose-500 font-bold" title="Bắt buộc">
+																		*
+																	</span>
+																)}
+																{isGenderField && (
+																	<span
+																		className="text-amber-500 font-bold text-[10px] ml-1"
+																		title="Cần chọn cột Giới tính chung HOẶC 2 cột Nam/Nữ"
+																	>
 																		*
 																	</span>
 																)}

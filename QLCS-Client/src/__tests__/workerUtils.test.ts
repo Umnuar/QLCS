@@ -37,6 +37,18 @@ describe("fuzzyMatch", () => {
 	it("should reject very different strings", () => {
 		expect(fuzzyMatch("abc", "xyz")).toBe(false);
 	});
+
+	it("should never match strings with different digits", () => {
+		expect(fuzzyMatch("Tròn 60 tuổi", "Tròn 65 tuổi")).toBe(false);
+		expect(fuzzyMatch("Tròn 70 tuổi", "Tròn 75 tuổi")).toBe(false);
+		expect(fuzzyMatch("Tròn 60 tuổi", "65 tuổi")).toBe(false);
+		expect(fuzzyMatch("Tròn 60 tuổi", "Tròn 60 tuổi")).toBe(true);
+	});
+
+	it("should not cross-match gender nam vs nu", () => {
+		expect(fuzzyMatch("gioitinh", "gioitinhnam")).toBe(false);
+		expect(fuzzyMatch("nam", "nu")).toBe(false);
+	});
 });
 
 describe("parseDob", () => {

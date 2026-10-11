@@ -2,7 +2,7 @@ import bcrypt from "bcryptjs";
 import type { Request, Response } from "express";
 import { prisma } from "../config/prisma";
 import type { AuthRequest } from "../middlewares/auth.middleware";
-import { getClientIp } from "../middlewares/logger.middleware";
+import { getClientIp, logAuth } from "../middlewares/logger.middleware";
 import {
 	generateAccessToken,
 	generateRefreshToken,
@@ -56,23 +56,17 @@ export const login = async (req: Request, res: Response) => {
 			where: { username: cleanUsername },
 		});
 		if (!user) {
-			console.log(
-				`\x1b[31m[AUTH-ALERT] Đăng nhập thất bại: Tài khoản "${username}" không tồn tại trong CSDL! (IP: ${clientIp})\x1b[0m`,
-			);
+			logAuth(username, "unknown", "LOGIN_FAILED", clientIp);
 			res.status(401).json({ error: "Sai thông tin đăng nhập" });
 			return;
 		}
 		const validPassword = await bcrypt.compare(password, user.password_hash);
 		if (!validPassword) {
-			console.log(
-				`\x1b[31m[AUTH-ALERT] Đăng nhập thất bại: Tài khoản "${cleanUsername}" nhập SAI MẬT KHẨU! (IP: ${clientIp})\x1b[0m`,
-			);
+			logAuth(cleanUsername, user.role, "LOGIN_FAILED", clientIp);
 			res.status(401).json({ error: "Sai thông tin đăng nhập" });
 			return;
 		}
-		console.log(
-			`\x1b[32m[AUTH-SUCCESS] Người dùng "${user.username}" [${user.role}] đăng nhập thành công! (IP: ${clientIp})\x1b[0m`,
-		);
+		logAuth(user.username, user.role, "LOGIN_SUCCESS", clientIp);
 		const payload: TokenPayload = {
 			id: user.id,
 			username: user.username,
@@ -152,6 +146,7 @@ export const refresh = async (req: Request, res: Response) => {
 				expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
 			},
 		});
+		logAuth(user.username, user.role, "TOKEN_REFRESH", getClientIp(req));
 		res.json({
 			data: { accessToken: newAccessToken, refreshToken: newRefreshToken },
 		});
@@ -218,6 +213,7 @@ export const changePassword = async (req: AuthRequest, res: Response) => {
 		await (prisma as any).refresh_tokens.deleteMany({
 			where: { user_id: req.user!.id },
 		});
+		logAuth(user.username, user.role, "PASSWORD_CHANGE", getClientIp(req));
 		res.json({ message: "Đổi mật khẩu thành công" });
 	} catch (error) {
 		res.status(500).json({ error: "Lỗi server" });
@@ -260,6 +256,9 @@ export const logout = async (req: AuthRequest, res: Response) => {
 			await (prisma as any).refresh_tokens.deleteMany({
 				where: { token: refreshToken },
 			});
+		}
+		if (req.user) {
+			logAuth(req.user.username, req.user.role, "LOGOUT", getClientIp(req));
 		}
 		res.json({ message: "Đăng xuất thành công" });
 	} catch (error) {

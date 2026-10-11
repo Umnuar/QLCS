@@ -297,10 +297,17 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
 
 		setIsSaving(true);
 		try {
-			const payload = { ...formData };
+			const payload: any = { ...formData };
 			if (isVillageOfficer && user?.village_id) {
 				payload.village_id = user.village_id;
 			}
+			if (!payload.village_id || String(payload.village_id).trim() === "") {
+				delete payload.village_id;
+			}
+			payload.current_address =
+				payload.current_address || payload.currentAddress || "";
+			delete payload.currentAddress;
+
 			// BẢO VỆ DỮ LIỆU CCCD: Nếu chuỗi CCCD đang ở dạng che hoặc không đổi so với ban đầu,
 			// loại bỏ trường cccd khỏi payload cập nhật để tránh backend ghi đè chuỗi che vào database
 			if (
@@ -309,17 +316,36 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
 			) {
 				delete payload.cccd;
 			}
-			if (activeTab === "chuctho" && calculatedAge !== null) {
-				payload.age60 = calculatedAge === 60 ? "x" : "";
-				payload.age65 = calculatedAge === 65 ? "x" : "";
-				payload.age70 = calculatedAge === 70 ? "x" : "";
-				payload.age75 = calculatedAge === 75 ? "x" : "";
-				payload.age80 = calculatedAge === 80 ? "x" : "";
-				payload.age85 = calculatedAge === 85 ? "x" : "";
-				payload.age90 = calculatedAge === 90 ? "x" : "";
-				payload.age95 = calculatedAge === 95 ? "x" : "";
-				payload.age100 = calculatedAge === 100 ? "x" : "";
-				payload.age_over_100 = calculatedAge > 100 ? "x" : "";
+			if (activeTab === "chuctho") {
+				delete payload.age75plus;
+				delete payload.age70to74poor;
+				delete payload.bao_tro;
+				delete payload.huu_tri;
+				delete payload.huu_tuat_bao_hiem;
+				delete payload.nguoi_co_cong;
+				if (calculatedAge !== null) {
+					payload.age60 = calculatedAge === 60 ? "x" : "";
+					payload.age65 = calculatedAge === 65 ? "x" : "";
+					payload.age70 = calculatedAge === 70 ? "x" : "";
+					payload.age75 = calculatedAge === 75 ? "x" : "";
+					payload.age80 = calculatedAge === 80 ? "x" : "";
+					payload.age85 = calculatedAge === 85 ? "x" : "";
+					payload.age90 = calculatedAge === 90 ? "x" : "";
+					payload.age95 = calculatedAge === 95 ? "x" : "";
+					payload.age100 = calculatedAge === 100 ? "x" : "";
+					payload.age_over_100 = calculatedAge > 100 ? "x" : "";
+				}
+			} else {
+				delete payload.age60;
+				delete payload.age65;
+				delete payload.age70;
+				delete payload.age75;
+				delete payload.age80;
+				delete payload.age85;
+				delete payload.age90;
+				delete payload.age95;
+				delete payload.age100;
+				delete payload.age_over_100;
 			}
 			payload.calculation_year = calculationYear;
 

@@ -201,14 +201,67 @@ export const getDeletedProfiles = async (req: AuthRequest, res: Response) => {
 	}
 };
 
+const ALLOWED_PROFILE_KEYS = new Set([
+	"stt",
+	"name",
+	"dob",
+	"gender",
+	"cccd",
+	"ethnicity",
+	"residence",
+	"current_address",
+	"village_id",
+	"age60",
+	"age65",
+	"age70",
+	"age75",
+	"age80",
+	"age85",
+	"age90",
+	"age95",
+	"age100",
+	"age_over_100",
+	"received",
+	"calculation_year",
+	"notes",
+]);
+
+const cleanProfilePayload = (raw: any): Record<string, any> => {
+	const cleaned: Record<string, any> = {};
+	const currentAddress =
+		raw.current_address !== undefined
+			? raw.current_address
+			: raw.currentAddress;
+	if (currentAddress !== undefined) {
+		cleaned.current_address = currentAddress || null;
+	}
+	for (const key of Object.keys(raw)) {
+		if (ALLOWED_PROFILE_KEYS.has(key)) {
+			let val = raw[key];
+			if (key === "village_id") {
+				val = val && String(val).trim() !== "" ? String(val).trim() : null;
+			}
+			if (key === "stt" || key === "calculation_year") {
+				val = val !== null && val !== undefined && val !== "" ? Number(val) : null;
+			}
+			if (key === "received") {
+				val = Boolean(val);
+			}
+			cleaned[key] = val;
+		}
+	}
+	return cleaned;
+};
+
 export const createProfile = async (req: AuthRequest, res: Response) => {
 	try {
-		const data = req.body;
-		const profileId = data.id || crypto.randomUUID();
+		const rawData = req.body;
+		const data = cleanProfilePayload(rawData);
+		const profileId = rawData.id || crypto.randomUUID();
 		const newProfile = await (prisma as any).profiles.create({
 			data: {
-				...(req.user?.village_id ? { village_id: req.user.village_id } : {}),
 				...data,
+				...(req.user?.village_id ? { village_id: req.user.village_id } : {}),
 				id: profileId,
 				name_unaccented: removeAccents(data.name || ""),
 				is_deleted: false,
@@ -240,7 +293,8 @@ export const createProfile = async (req: AuthRequest, res: Response) => {
 export const updateProfile = async (req: AuthRequest, res: Response) => {
 	try {
 		const id = req.params.id as string;
-		const data = req.body;
+		const rawData = req.body;
+		const data = cleanProfilePayload(rawData);
 		const currentProfile = await (prisma as any).profiles.findUnique({
 			where: { id },
 		});
@@ -257,8 +311,8 @@ export const updateProfile = async (req: AuthRequest, res: Response) => {
 		}
 		// Optimistic locking
 		if (
-			data.version !== undefined &&
-			Number(data.version) !== Number(currentProfile.version)
+			rawData.version !== undefined &&
+			Number(rawData.version) !== Number(currentProfile.version)
 		) {
 			res.status(409).json({
 				error: "Hồ sơ đã được sửa bởi người khác",
@@ -270,8 +324,8 @@ export const updateProfile = async (req: AuthRequest, res: Response) => {
 		const updatedProfile = await (prisma as any).profiles.update({
 			where: { id },
 			data: {
-				...(req.user?.village_id ? { village_id: req.user.village_id } : {}),
 				...data,
+				...(req.user?.village_id ? { village_id: req.user.village_id } : {}),
 				version: currentProfile.version! + 1,
 				updated_at: new Date(),
 			},

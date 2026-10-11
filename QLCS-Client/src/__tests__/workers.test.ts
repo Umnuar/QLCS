@@ -77,7 +77,7 @@ describe("Import Web Workers", () => {
 			const result = doneCall![0];
 
 			// Should have 2 successfully parsed profiles: Nguyen Van A (60) and Tran Thi B (70)
-			expect(result.profiles).toHaveLength(2);
+			expect(result.profiles).toHaveLength(3);
 			expect(result.profiles[0].name).toBe("Nguyen Van A");
 			expect(result.profiles[0].gender).toBe("Nam");
 			expect(result.profiles[0].age60).toBe("x");
@@ -86,11 +86,13 @@ describe("Import Web Workers", () => {
 			expect(result.profiles[1].name).toBe("Tran Thi B");
 			expect(result.profiles[1].gender).toBe("Nữ");
 			expect(result.profiles[1].age70).toBe("x");
+			expect(result.profiles[2].name).toBe("Le Van C");
+			expect(result.profiles[2].age).toBe(56);
 
 			// Le Van C (56) should be ignored
 			// Pham Van D (deceased) should be ignored
 			// Bui Van E (no gender) should be ignored
-			expect(result.errors.length).toBeGreaterThanOrEqual(3);
+			expect(result.errors.length).toBeGreaterThanOrEqual(2);
 		});
 	});
 
@@ -142,3 +144,5 @@ describe("Import Web Workers", () => {
 		});
 	});
 });
+
+

@@ -22,6 +22,12 @@ const BTH_COL_MAP: Record<string, string> = {
 	"ngay sinh": "dob",
 	"nam sinh": "dob",
 	ns: "dob",
+	"giới tính": "gender",
+	"gioi tinh": "gender",
+	"nam / nu": "gender",
+	"nam/nu": "gender",
+	"nam nu": "gender",
+	namnu: "gender",
 	nam: "genderNam",
 	"giới tính nam": "genderNam",
 	nữ: "genderNu",
@@ -163,7 +169,38 @@ self.onmessage = (e) => {
 
 		const genderNam = getCol("genderNam");
 		const genderNu = getCol("genderNu");
-		const hasNoGender = !genderNam && !genderNu;
+		const rawGender = getCol("gender");
+
+		let gender = "";
+		if (genderNam && !genderNu) {
+			gender = "Nam";
+		} else if (genderNu && !genderNam) {
+			gender = "Nữ";
+		} else if (genderNam && genderNu) {
+			gender = "Nam";
+		} else if (rawGender) {
+			const gNorm = rawGender.toLowerCase().trim();
+			if (
+				gNorm === "nam" ||
+				gNorm === "m" ||
+				gNorm === "1" ||
+				gNorm.startsWith("nam")
+			) {
+				gender = "Nam";
+			} else if (
+				gNorm === "nữ" ||
+				gNorm === "nu" ||
+				gNorm === "f" ||
+				gNorm === "0" ||
+				gNorm === "2" ||
+				gNorm.startsWith("nữ") ||
+				gNorm.startsWith("nu")
+			) {
+				gender = "Nữ";
+			}
+		}
+
+		const hasNoGender = !gender && !genderNam && !genderNu;
 
 		if (isDeceasedOrMoved || hasNoGender) {
 			const reason = isDeceasedOrMoved
@@ -190,7 +227,7 @@ self.onmessage = (e) => {
 			stt: parseInt(getCol("stt"), 10) || 0,
 			name,
 			dob: dobParsed.dob,
-			gender: getCol("genderNam") ? "Nam" : getCol("genderNu") ? "Nữ" : "",
+			gender: gender || (genderNam ? "Nam" : genderNu ? "Nữ" : ""),
 			cccd,
 			ethnicity: getCol("ethnicity"),
 			residence: getCol("residence"),

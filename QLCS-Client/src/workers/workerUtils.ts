@@ -26,14 +26,35 @@ export const fuzzyMatch = (a: string, b: string, threshold = 0.75) => {
 
 	if (s1 === s2) return true;
 
+	// Ràng buộc số: nếu chuỗi có số (vd 60, 65, 70), số PHẢI trùng khớp tuyệt đối, không được khớp mờ
+	const num1 = s1.replace(/\D/g, "");
+	const num2 = s2.replace(/\D/g, "");
+	if (num1.length > 0 && num2.length > 0 && num1 !== num2) {
+		return false;
+	}
+	if ((num1.length > 0 && num2.length === 0) || (num1.length === 0 && num2.length > 0)) {
+		return false;
+	}
+
+	// Tránh lẫn lộn cột giới tính:
+	// Nếu một chuỗi có chỉ định giới tính cụ thể (nam hoặc nu) còn chuỗi kia không có, hoặc 2 chuỗi khác giới tính, không được khớp
+	const hasNam1 = s1.includes("nam");
+	const hasNu1 = s1.includes("nu");
+	const hasNam2 = s2.includes("nam");
+	const hasNu2 = s2.includes("nu");
+
+	if ((hasNam1 && !hasNu1 && hasNu2) || (hasNu1 && !hasNam1 && hasNam2)) {
+		return false;
+	}
+	const hasSpecificGender1 = (hasNam1 && !hasNu1) || (hasNu1 && !hasNam1);
+	const hasSpecificGender2 = (hasNam2 && !hasNu2) || (hasNu2 && !hasNam2);
+	if (hasSpecificGender1 !== hasSpecificGender2) {
+		return false;
+	}
+
 	// Allow substring match for normalized strings to handle cases like "hưu, tuất" vs "Hưu, Tuất Bảo hiểm"
 	if (s1.length > 3 && s2.length > 3) {
-		// Avoid cross-matching gender columns (e.g. "gioitinh" vs "gioitinhnam")
-		const isGenderA = s1.includes("nam") || s1.includes("nu");
-		const isGenderB = s2.includes("nam") || s2.includes("nu");
-		if (isGenderA === isGenderB) {
-			if (s1.includes(s2) || s2.includes(s1)) return true;
-		}
+		if (s1.includes(s2) || s2.includes(s1)) return true;
 	}
 
 	if (s1.length === 0 || s2.length === 0) return false;
@@ -84,7 +105,7 @@ export function parseDob(
 			};
 	}
 
-	const str = String(raw).trim();
+	const str = String(raw).trim().replace(/\.0+$/, "");
 
 	const isoMatch = str.match(/^(\d{4})[/.-](\d{1,2})[/.-](\d{1,2})$/);
 	if (isoMatch)
@@ -171,9 +192,16 @@ export function findHeaderAndDataStart(rows: any[][]): {
 		const row = rows[i];
 		if (!row) continue;
 
-		const hasNameCol = row.some(
-			(cell) => cell && fuzzyMatch(String(cell), "ho va ten", 0.7),
-		);
+		const hasNameCol = row.some((cell) => {
+			if (!cell) return false;
+			const norm = normalizeStr(String(cell));
+			return (
+				norm.includes("hovaten") ||
+				norm.includes("hoten") ||
+				norm === "ten" ||
+				fuzzyMatch(String(cell), "ho va ten", 0.7)
+			);
+		});
 		if (!hasNameCol) continue;
 
 		for (let j = i + 1; j < Math.min(i + 10, rows.length); j++) {

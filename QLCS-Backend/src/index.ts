@@ -3,7 +3,13 @@ import cors from "cors";
 import express from "express";
 import helmet from "helmet";
 import { initBackupCron } from "./controllers/backup.controller";
-import { requestLogger } from "./middlewares/logger.middleware";
+import {
+	getDbConnectionInfo,
+	logDb,
+	logError,
+	logStart,
+	requestLogger,
+} from "./middlewares/logger.middleware";
 import analyticsRoutes from "./routes/analytics.routes";
 import auditRoutes from "./routes/audit.routes";
 import authRoutes from "./routes/auth.routes";
@@ -15,20 +21,30 @@ import settingsRoutes from "./routes/settings.routes";
 import usersRoutes from "./routes/users.routes";
 import villagesRoutes from "./routes/villages.routes";
 import { prisma } from "./config/prisma";
-import { startDashboard } from "./utils/dashboard";
 
 const app = express();
 app.set("trust proxy", 1);
 
-// SEC-04-02: Khóa cứng CORS Whitelist - chỉ cho phép đúng cổng dev máy khách và domain chính thức HTTPS
+// SEC-04-02: Cấu hình CORS Whitelist - hỗ trợ Web, Tauri Desktop (tauri.localhost), Cloudflare Tunnel và Local dev
+const envCorsOrigins = process.env.CORS_ORIGIN
+	? process.env.CORS_ORIGIN.split(",").map((o) => o.trim())
+	: [];
+
 const isOriginAllowed = (origin: string | undefined): boolean => {
-	if (!origin) return true; // Hỗ trợ Electron Desktop (file://), mobile, cURL
+	if (!origin || origin === "null") return true; // Hỗ trợ Desktop (file://), mobile, cURL
 	if (
 		origin === "https://qlcs.dulieudakha.vn" ||
 		origin.endsWith(".dulieudakha.vn") ||
 		origin === "https://dulieudakha.vn" ||
-		origin === "http://localhost:5173" ||
-		origin === "http://127.0.0.1:5173"
+		origin === "http://tauri.localhost" ||
+		origin === "https://tauri.localhost" ||
+		origin.startsWith("tauri://") ||
+		origin.endsWith(".localhost") ||
+		origin.startsWith("http://localhost:") ||
+		origin.startsWith("http://127.0.0.1:") ||
+		origin.startsWith("https://localhost:") ||
+		origin.startsWith("https://127.0.0.1:") ||
+		envCorsOrigins.includes(origin)
 	) {
 		return true;
 	}
@@ -107,10 +123,11 @@ app.use(
 		res: express.Response,
 		_next: express.NextFunction,
 	) => {
-		console.error(err);
+		const statusCode = err.status || 500;
+		logError(statusCode, err.message || "Internal Server Error");
 		const message =
 			process.env.NODE_ENV === "production" ? "Lỗi server" : err.message;
-		res.status(err.status || 500).json({ error: message });
+		res.status(statusCode).json({ error: message });
 	},
 );
 
@@ -118,14 +135,21 @@ app.use(
 initBackupCron();
 
 // Start server
-const PORT = process.env.PORT || 5000;
-const server = app.listen(PORT, () => {
-	console.log(`[Server] QLCS Backend v2.0.0 running on port ${PORT}`);
-	console.log(`[Server] Environment: ${process.env.NODE_ENV || "development"}`);
+const PORT = Number(process.env.PORT) || 5000;
+const server = app.listen(PORT, async () => {
+	const env = process.env.NODE_ENV || "development";
+	const dbInfo = getDbConnectionInfo();
+	let dbStatus = "Connected";
 
-	if (process.env.NODE_ENV !== "test") {
-		startDashboard();
+	try {
+		await (prisma as any).$queryRawUnsafe("SELECT 1");
+		logDb(dbInfo);
+	} catch {
+		dbStatus = "Disconnected";
+		logError("DB_CONN", `Cannot connect to PostgreSQL at ${dbInfo}`);
 	}
+
+	logStart(PORT, dbStatus, env);
 });
 
 // Giữ kết nối Cloudflare Tunnel luôn ấm (Keep-Alive)

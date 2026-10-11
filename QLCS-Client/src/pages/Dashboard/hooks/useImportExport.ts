@@ -102,8 +102,18 @@ export function useImportExport(
 			"namsinh",
 			"ns",
 		],
-		genderNam: ["nam", "gioi tinh nam"],
-		genderNu: ["nu", "gioi tinh nu"],
+		gender: [
+			"gioi tinh",
+			"gioitinh",
+			"gioi tinh (nam/nu)",
+			"gioitinhnamnu",
+			"nam / nu",
+			"nam/nu",
+			"nam nu",
+			"namnu",
+		],
+		genderNam: ["nam", "gioi tinh nam", "gioitinhnam"],
+		genderNu: ["nu", "gioi tinh nu", "gioitinhnu"],
 		cccd: [
 			"so cccd",
 			"cccd",
@@ -126,9 +136,16 @@ export function useImportExport(
 		currentAddress: [
 			"noi o hien nay",
 			"noiohiennay",
-			"noi cu tru hien nay",
 			"dia chi hien nay",
+			"diachihiennay",
 			"cho o hien nay",
+			"choohiennay",
+			"noi o",
+			"noio",
+			"dia chi",
+			"diachi",
+			"cho o",
+			"choo",
 		],
 		age60: ["tron 60", "tron60", "tron 60 tuoi", "60 tuoi"],
 		age65: ["tron 65", "tron65", "tron 65 tuoi", "65 tuoi"],
@@ -190,8 +207,18 @@ export function useImportExport(
 			"namsinh",
 			"ns",
 		],
-		genderNam: ["nam", "gioi tinh nam"],
-		genderNu: ["nu", "gioi tinh nu"],
+		gender: [
+			"gioi tinh",
+			"gioitinh",
+			"gioi tinh (nam/nu)",
+			"gioitinhnamnu",
+			"nam / nu",
+			"nam/nu",
+			"nam nu",
+			"namnu",
+		],
+		genderNam: ["nam", "gioi tinh nam", "gioitinhnam"],
+		genderNu: ["nu", "gioi tinh nu", "gioitinhnu"],
 		cccd: [
 			"so cccd",
 			"cccd",
@@ -209,6 +236,20 @@ export function useImportExport(
 			"ho khau thuong tru",
 			"hokhau",
 			"thuong tru",
+		],
+		currentAddress: [
+			"noi o hien nay",
+			"noiohiennay",
+			"dia chi hien nay",
+			"diachihiennay",
+			"cho o hien nay",
+			"choohiennay",
+			"noi o",
+			"noio",
+			"dia chi",
+			"diachi",
+			"cho o",
+			"choo",
 		],
 	};
 
@@ -257,39 +298,92 @@ export function useImportExport(
 				.replace(/[^a-z0-9]/gi, "")
 				.toLowerCase();
 
-		// Khớp an toàn: tránh substring ngắn khớp nhầm (vd 'tt' trong 'cutru')
-		const isSafeMatch = (normH: string, normK: string): boolean => {
-			if (normH === normK) return true;
-			// Chỉ cho phép substring nếu keyword đủ dài (>= 4 ký tự)
-			if (normK.length >= 4 && normH.includes(normK)) return true;
-			if (normK.length >= 4 && normK.includes(normH) && normH.length >= 3)
-				return true;
+		const extractDigits = (s: string) => s.replace(/\D/g, "");
 
-			// Khớp mờ Levenshtein
-			const dist = getLevenshteinDistance(normH, normK);
-			const maxAllowedDist = normK.length > 8 ? 2 : 1;
-			if (
-				dist <= maxAllowedDist &&
-				dist < normK.length &&
-				dist < normH.length
-			) {
-				return true;
+		const scoreMatch = (normH: string, normK: string): number => {
+			const dH = extractDigits(normH);
+			const dK = extractDigits(normK);
+			// Ràng buộc số: nếu bất kỳ chuỗi nào có số, số phải khớp chính xác 100%
+			if (dH !== dK) return 0;
+
+			// Tránh lẫn lộn giới tính nam / nu khi so khớp chuỗi ngắn
+			const hasNamH = normH.includes("nam");
+			const hasNuH = normH.includes("nu");
+			const hasNamK = normK.includes("nam");
+			const hasNuK = normK.includes("nu");
+			if ((hasNamH && !hasNuH && hasNuK) || (hasNuH && !hasNamH && hasNamK)) {
+				return 0;
 			}
-			return false;
+
+			if (normH === normK) return 1000;
+
+			// Prefix / Suffix match
+			if (normH.startsWith(normK) || normH.endsWith(normK)) return 800;
+			if (normK.startsWith(normH) || normK.endsWith(normH)) return 700;
+
+			// Substring match (chỉ khi cả 2 chuỗi >= 4 ký tự)
+			if (normH.length >= 4 && normK.length >= 4) {
+				if (normH.includes(normK)) {
+					return 500 - (normH.length - normK.length) * 5;
+				}
+				if (normK.includes(normH)) {
+					return 450 - (normK.length - normH.length) * 5;
+				}
+			}
+
+			// Levenshtein fuzzy match (chỉ khi >= 4 ký tự và khoảng cách nhỏ)
+			if (normH.length >= 4 && normK.length >= 4) {
+				const dist = getLevenshteinDistance(normH, normK);
+				const maxAllowedDist = normK.length > 8 ? 2 : 1;
+				if (dist <= maxAllowedDist && dist < normK.length && dist < normH.length) {
+					return 300 - dist * 50;
+				}
+			}
+
+			return 0;
 		};
 
+		interface Candidate {
+			fieldName: string;
+			header: string;
+			score: number;
+		}
+
+		const candidates: Candidate[] = [];
+
 		for (const [fieldName, keywords] of Object.entries(mapRules)) {
-			const matchedHeader = headers.find((h) => {
-				const normH = normalize(h);
-				return keywords.some((k) => {
-					const normK = normalize(k);
-					return isSafeMatch(normH, normK);
-				});
-			});
-			if (matchedHeader) {
-				mapping[fieldName] = matchedHeader;
+			for (const header of headers) {
+				const normH = normalize(header);
+				if (!normH) continue;
+				let maxScore = 0;
+				for (const kw of keywords) {
+					const normK = normalize(kw);
+					if (!normK) continue;
+					const score = scoreMatch(normH, normK);
+					if (score > maxScore) {
+						maxScore = score;
+					}
+				}
+				if (maxScore > 0) {
+					candidates.push({ fieldName, header, score: maxScore });
+				}
 			}
 		}
+
+		// Sắp xếp điểm giảm dần để ghép cặp tối ưu trước
+		candidates.sort((a, b) => b.score - a.score);
+
+		const assignedFields = new Set<string>();
+		const assignedHeaders = new Set<string>();
+
+		for (const cand of candidates) {
+			if (!assignedFields.has(cand.fieldName) && !assignedHeaders.has(cand.header)) {
+				mapping[cand.fieldName] = cand.header;
+				assignedFields.add(cand.fieldName);
+				assignedHeaders.add(cand.header);
+			}
+		}
+
 		return mapping;
 	};
 
