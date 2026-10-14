@@ -1,6 +1,6 @@
 # HỆ THỐNG QUẢN LÝ CHÍNH SÁCH (QLCS) - XÃ ĐĂK HÀ
 
-> **Phiên bản:** v2.2.0 (Chính thức)  
+> **Phiên bản:** v1 (Chính thức)  
 > **Nền tảng:** Windows Desktop (Tauri v2 + React 18 + TypeScript)  
 > **Đơn vị chủ quản:** Ủy ban Nhân dân Xã Đăk Hà, Huyện Tu Mơ Rông, Tỉnh Kon Tum
 
@@ -59,7 +59,7 @@ Phần mềm hỗ trợ đắc lực cho cán bộ phụ trách Lao động - Th
 ### Các Bước Cài Đặt:
 1. Truy cập mục phát hành chính thức: [**QLCS Releases**](https://github.com/Umnuar/QLCS/releases).
 2. Tải về tệp cài đặt mới nhất:
-   - Bản cài đặt chuẩn: `QLCS-v2.2.0-x64-setup.exe` hoặc `QLCS_2.2.0_x64_en-US.msi`.
+   - Bản cài đặt chuẩn: `QLCS-v1-x64-setup.exe` hoặc `QLCS_1_x64_en-US.msi`.
 3. Nhấp đúp vào tệp vừa tải về để tiến hành cài đặt.
 4. Mở ứng dụng từ Desktop hoặc Start Menu, đăng nhập bằng tài khoản do Quản trị viên cấp xã cung cấp.
 
